@@ -1,0 +1,23 @@
+.target-wrapper {
+	padding: 15px;
+}
+
+.target-avatar {
+	/*border: 1px solid;*/
+	width: 150px;
+	height: 150px;
+	float: left;
+}
+
+#target-modal .modal-body {
+	height: 300px;
+}
+
+#selected-friend-avatar {
+	width: 120px;
+	height: 120px;
+}
+
+#modal-add-target {
+	width: 300px;
+}

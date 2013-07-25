@@ -1,24 +1,31 @@
 var targets;
 if (localStorage.getItem("targets") !== null) {
-	notifAmount = $.evalJSON(localStorage.getItem("targets")); 	
+	targets = $.evalJSON(localStorage.getItem("targets")); 	
 } else {
 	targets = {};
 }
 
 $(document).ready(function() {
 
+	var selectedTarget,
+		$currTargetWrapper;
+
+	var originKeys = getKeysFromObject(targets).sort();
+
+	for (var i = 0; i < originKeys.length; i++) {
+		$(".target-wrapper").eq(i).attr("id", "t"+originKeys[i]);
+	}
+
 	$("#btn-add").click(function() {
 		$("#modal-add-target input").val("");
+		$currTargetWrapper = $(this).parents(".target-wrapper");
 	});
 
 	$("#modal-add-target .confirm").click(function() {
 		var inputVal = $("#modal-add-target input").val();
 		if (inputVal === "") {
 		} else {
-			var keys = [];
-			for (var key in targets) {
-				keys.push(parseInt(key));
-			}
+			var keys = getKeysFromObject(targets);
 			var id;
 			if (keys.length !== 0) {
 				id = Math.max.apply(null,keys) + 1;
@@ -26,18 +33,17 @@ $(document).ready(function() {
 				id = 1;
 			}	
 			targets[id] = { "mark": inputVal };
-			alert($.toJSON(targets));
-			//localStorage.setItem("targets", $.toString(targets));
+			localStorage.setItem("targets", $.toJSON(targets));
+			$currTargetWrapper.attr("id", "t"+id);
 			$('#modal-add-target').modal('hide');
 		}
 	});
-
-	var targetInfo;
 
 	$(".social-btn-first").click(function() {
 		$('#friend-inputor').val("");
 		$("#selected-friend-avatar").attr("src", "");
 		$("#selected-friend-name").text("");
+		$currTargetWrapper = $(this).parents(".target-wrapper");
 		$.ajax({
 			url: "https://api.weibo.com/2/account/get_uid.json?source=5786724301",
 			type: "GET",
@@ -56,7 +62,7 @@ $(document).ready(function() {
 							success: function(data) {
 								$("#selected-friend-avatar").attr("src", data.avatar_large);
 								$("#selected-friend-name").text(item);
-								targetInfo = data;
+								selectedTarget = data;
 							},
 							error: function(data) {
 								alert("Show Ajax Error");
@@ -72,18 +78,23 @@ $(document).ready(function() {
 		});
 	});	
 
-/*
-	$("#target-modal-confirm").click(function(){
-		var keys = [];
-		for (var key in targets) {
-			keys.push(parseInt(key));
+
+	$("#target-modal .confirm").click(function(){
+		var id = $currTargetWrapper.attr("id").substr(1);
+		if ($("#selected-friend-name").text() !== "") {
+			targets[id]["weibo"] = {
+				"id": selectedTarget.id,
+				"screen_name": selectedTarget.screen_name,
+				"profile_image_url": selectedTarget.profile_image_url,
+				"avatar_large": selectedTarget.avatar_large
+			};
+			localStorage.setItem("targets", $.toJSON(targets));
+			$('#target-modal').modal('hide');
+		} else {
+
 		}
-		var id = Math.max.apply(null,keys);
-		targets[id] = {
-			mark: 
-		}	
 	});
-*/
+
 });
 
 function getAllScreenNames(uid, screenNames, cursor) {
@@ -106,4 +117,12 @@ function getAllScreenNames(uid, screenNames, cursor) {
 			alert("Friends Ajax Error");
 		}
 	});
+}
+
+function getKeysFromObject(obj) {
+	var keys = [];
+	for (var key in obj) {
+		keys.push(parseInt(key));
+	}
+	return keys;
 }

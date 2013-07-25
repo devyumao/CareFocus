@@ -17,5 +17,5 @@
     "https://*/*",
     "tabs"
   ],
-  "content_security_policy": "script-src 'self' https://tjs.sjs.sinajs.cn; object-src 'self'"
+  "content_security_policy": "script-src 'self'; object-src 'self'"
 }

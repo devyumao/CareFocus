@@ -1,9 +1,14 @@
-var targets;
+var targets,
+	unreadStatuses;
 if (localStorage.getItem("targets") !== null) {
-	targets = $.evalJSON(localStorage.getItem("targets")); 	
+	targets = $.evalJSON(localStorage.getItem("targets"));
+	unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses")); 	
 } else {
 	targets = {};
+	unreadStatuses = {};
 }
+
+var backgroundPage = chrome.extension.getBackgroundPage();
 
 $(document).ready(function() {
 
@@ -33,7 +38,9 @@ $(document).ready(function() {
 				id = 1;
 			}	
 			targets[id] = { "mark": inputVal };
+			unreadStatuses[id] = [];
 			localStorage.setItem("targets", $.toJSON(targets));
+			localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
 			$currTargetWrapper.attr("id", "t"+id);
 			$('#modal-add-target').modal('hide');
 		}
@@ -89,6 +96,7 @@ $(document).ready(function() {
 				"avatar_large": selectedTarget.avatar_large
 			};
 			localStorage.setItem("targets", $.toJSON(targets));
+			backgroundPage.location.reload();
 			$('#target-modal').modal('hide');
 		} else {
 

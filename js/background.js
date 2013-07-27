@@ -1,20 +1,20 @@
-//open -a Google\ Chrome --args -disable-web-security
-//iphone客户端：5786724301
-
 var notifAmount;
 if (localStorage.getItem("notifAmount") !== null) {
-	notifAmount = parseInt(localStorage.getItem("notifAmount")); 	
+	notifAmount = parseInt(localStorage.getItem("notifAmount"));
+	chrome.browserAction.setBadgeText({text: "" + notifAmount}); 	
 } else {
 	notifAmount = 0;
 }
-
-if (localStorage.getItem("unreadStatuses") !== null) {
+ 
+if (localStorage.getItem("targets") !== null) {
+	var targets = $.evalJSON(localStorage.getItem("targets"));
 	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
-} else {
-	var unreadStatuses = [];
+	for (var key in targets) {
+		checkWeiboUpdate(key, targets[key]["weibo"]["id"])();
+	}
 }
 
-function checkWeiboUpdate(uid) {
+function checkWeiboUpdate(key, uid) {
 	return function() {
 		$.ajax({
 			url: "https://api.weibo.com/2/statuses/user_timeline.json?source=5786724301&uid="+uid+"&trim_user=0",
@@ -23,8 +23,8 @@ function checkWeiboUpdate(uid) {
 			success: function(data) {
 				console.log(uid + ": " + Date());
 				var isStatusesUpdated = false;
-				var lastCheckPoint = new Date(localStorage.getItem("checkPoint"));
 				if (localStorage.getItem("checkPoint") !== null) {
+					var lastCheckPoint = new Date(localStorage.getItem("checkPoint"));
 					for (var i = 0; i < data.statuses.length; i++) {
 						var status = data.statuses[i];
 						var createdAt = new Date(status.created_at);
@@ -32,7 +32,7 @@ function checkWeiboUpdate(uid) {
 							if(0 === i) {
 								localStorage.setItem("checkPoint", status.created_at);	
 							}
-							unreadStatuses.push({type: "weibo", data: status});
+							unreadStatuses[key].push({type: "weibo", data: status});
 							notifAmount++;
 							isStatusesUpdated = true;
 						} else {
@@ -62,16 +62,7 @@ function checkWeiboUpdate(uid) {
 			}
 		});
 
-		setTimeout(checkWeiboUpdate(uid), 5000);
+		setTimeout(checkWeiboUpdate(key, uid), 5000);
 	};
 	
 }
-
- 
-if (localStorage.getItem("targets") !== null) {
-	var targets = $.evalJSON(localStorage.getItem("targets"));
-	for (var key in targets) {
-		checkWeiboUpdate(targets[key]["weibo"]["id"])();
-	}
-}
-

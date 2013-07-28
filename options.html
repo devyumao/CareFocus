@@ -8,49 +8,60 @@
 	<script src="js/jquery.js"></script>
 	<script src="js/jquery.json.js"></script>
 	<script src="js/bootstrap.js"></script>
+	<script src="js/typeahead.js"></script>
 	<script src="js/options.js"></script>
 </head>
 <body>
 
+	<input type="text" id="test" />
+
 	<div class="target-wrapper">
-    <a href="#modal-add-target" role="button" id="btn-add" class="btn" data-toggle="modal">+</a>
-    <div>
-  		<img class="target-avatar" src="" />
-  		<div class="target-social-btns btn-group btn-group-vertical">
-  			<a href="#target-modal" role="button" class="btn social-btn-first" data-toggle="modal">weibo</a>
-  		</div>
-    </div>
+	    <a href="#modal-add-target" id="btn-add" class="btn btn-default" data-toggle="modal">+</a>
+	    <div>
+	  		<img class="target-avatar" src="" />
+	  		<div class="target-social-btns btn-group">
+	  			<a href="#target-modal" class="btn btn-default social-btn-first" data-toggle="modal">weibo</a>
+	  		</div>
+	    </div>
 	</div>
 
-	<div id="modal-add-target" class="modal hide" tabindex="-1" role="dialog" aria-hidden="true">
-		<div class="modal-header">
-  		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-  		<h3>添加一个关注对象</h3>
-		</div>
-		<div class="modal-body">
-			<input type="text" />
-		</div>
-		<div class="modal-footer">
-  		<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-  		<button class="btn btn-primary confirm">确认</button>
+	<div id="modal-add-target" class="modal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+		  			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		  			<h3>添加一个关注对象</h3>
+				</div>
+				<div class="modal-body">
+					<input type="text" />
+				</div>
+				<div class="modal-footer">
+		  			<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+		  			<button class="btn btn-primary confirm">确认</button>
+				</div>
+			</div>
 		</div>
 	</div>
 
-	<div id="target-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-		<div class="modal-header">
-  		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-  		<h3>选择ta的帐号</h3>
-		</div>
-		<div class="modal-body">
-			<input type="text" id="friend-inputor" data-provide="typeahead" autocomplete="off" data-source=""/>
-  		<div id="selected-friend">
-  			<img id="selected-friend-avatar" src="" />
-  			<p id="selected-friend-name"></p>
-  		</div>
-		</div>
-		<div class="modal-footer">
-  		<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-  		<button class="btn btn-primary confirm">确认</button>
+	<div id="target-modal" class="modal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+		  			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		  			<h3>选择ta的帐号</h3>
+				</div>
+				<div class="modal-body">
+					<input type="text" id="friend-inputor" autocomplete="off" />
+			  		<div id="selected-friend">
+			  			<img id="selected-friend-avatar" src="" />
+			  			<p id="selected-friend-name"></p>
+			  		</div>
+				</div>
+				<div class="modal-footer">
+		  			<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+		  			<button class="btn btn-primary confirm">确认</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>

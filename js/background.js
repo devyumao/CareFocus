@@ -62,7 +62,7 @@ function checkWeiboUpdate(key, uid) {
 			}
 		});
 
-		setTimeout(checkWeiboUpdate(key, uid), 5000);
+		setTimeout(checkWeiboUpdate(key, uid), 10000);
 	};
 	
 }

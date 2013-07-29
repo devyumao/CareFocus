@@ -4,6 +4,7 @@
 	<meta charset="utf-8" />
 	<title>设置</title>
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-glyphicons.css" />
 	<link rel="stylesheet" type="text/css" href="css/options.css" />
 	<script src="js/jquery.js"></script>
 	<script src="js/jquery.json.js"></script>
@@ -12,20 +13,47 @@
 	<script src="js/options.js"></script>
 </head>
 <body>
-
-	<input type="text" id="test" />
-
-	<div class="target-wrapper">
-	    <a href="#modal-add-target" id="btn-add" class="btn btn-default" data-toggle="modal">+</a>
-	    <div>
-	  		<img class="target-avatar" src="" />
-	  		<div class="target-social-btns btn-group">
-	  			<a href="#target-modal" class="btn btn-default social-btn-first" data-toggle="modal">weibo</a>
-	  		</div>
-	    </div>
+	<a href="#modal-add-target" id="btn-add" class="btn btn-default" data-toggle="modal">添加新的关注对象</a>
+	<div class="row row-targets">
 	</div>
 
-	<div id="modal-add-target" class="modal">
+	<div id="modal-edit-target" class="modal fade in" >
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+		  			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		  			<h3>修改备注名</h3>
+				</div>
+				<div class="modal-body">
+					<input type="text" />
+				</div>
+				<div class="modal-footer">
+		  			<button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
+		  			<button class="btn btn-primary confirm">确认</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="modal-remove-target" class="modal fade in" >
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+		  			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		  			<h3>提示</h3>
+				</div>
+				<div class="modal-body">
+					确认要取消关注<span></span>吗？
+				</div>
+				<div class="modal-footer">
+		  			<button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
+		  			<button class="btn btn-primary confirm">确认</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="modal-add-target" class="modal fade in" >
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -36,14 +64,14 @@
 					<input type="text" />
 				</div>
 				<div class="modal-footer">
-		  			<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+		  			<button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
 		  			<button class="btn btn-primary confirm">确认</button>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<div id="target-modal" class="modal">
+	<div id="target-modal" class="modal fade in">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -58,7 +86,7 @@
 			  		</div>
 				</div>
 				<div class="modal-footer">
-		  			<button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+		  			<button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
 		  			<button class="btn btn-primary confirm">确认</button>
 				</div>
 			</div>

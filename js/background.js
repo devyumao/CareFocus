@@ -6,11 +6,14 @@ if (localStorage.getItem("notifAmount") !== null) {
 	notifAmount = 0;
 }
  
+
 if (localStorage.getItem("targets") !== null) {
 	var targets = $.evalJSON(localStorage.getItem("targets"));
 	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
 	for (var key in targets) {
-		checkWeiboUpdate(key, targets[key]["weibo"]["id"])();
+		if(typeof targets[key]["weibo"] !== "undefined") {
+			checkWeiboUpdate(key, targets[key]["weibo"]["id"])();
+		}
 	}
 }
 

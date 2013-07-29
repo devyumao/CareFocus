@@ -10,99 +10,164 @@ if (localStorage.getItem("targets") !== null) {
 
 var backgroundPage = chrome.extension.getBackgroundPage();
 
+var $currTargetWrapper,
+	currId,
+	selectedTarget;
+
+var targetHTML = '<div class="col-lg-2 target-wrapper">'
+	+	'<div class="panel">'
+	+		'<div class="panel-heading">'
+	+			'<span class="target-mark"></span>'
+	+			'<span class="glyphicon glyphicon-remove-sign" href="#modal-remove-target" data-toggle="modal"></span>'
+	+			'<span class="glyphicon glyphicon-edit" href="#modal-edit-target" data-toggle="modal"></span>'
+	+		'</div>'
+	+		'<div>'
+	+	  		'<img class="target-avatar" />'
+	+	  	'</div>'
+	+  		'<div class="target-social-btns btn-group">'
+	+  			'<a href="#target-modal" class="btn btn-default social-btn-first" data-toggle="modal">wb</a>'
+	+  		'</div>'
+	+	'</div>'
+	+ '</div>';
+
+
 $(document).ready(function() {
 
-	var selectedTarget,
-		$currTargetWrapper;
-
 	var originKeys = getKeysFromObject(targets).sort();
+	var $rowTargets = $(".row-targets");
 
 	for (var i = 0; i < originKeys.length; i++) {
-		$(".target-wrapper").eq(i).attr("id", "t"+originKeys[i]);
+		$rowTargets.append(targetHTML);
+		var $wrapper = $(".target-wrapper").eq(i);
+		var key = originKeys[i];
+		$wrapper.attr("id", "t"+key);
+		$wrapper.find(".target-mark").text(targets[key]["mark"]);
+		if (typeof targets[key]["weibo"] !== "undefined") {
+			$wrapper.find(".target-avatar").attr("src", targets[key]["weibo"]["avatar_large"]);
+		}
 	}
 
-	$("#btn-add").click(function() {
-		$("#modal-add-target input").val("");
-		$currTargetWrapper = $(this).parents(".target-wrapper");
-	});
+});
 
-	$("#modal-add-target .confirm").click(function() {
-		var inputVal = $("#modal-add-target input").val();
-		if (inputVal === "") {
+
+$(document).on({
+	mouseenter: function() {
+		$(this).find(".panel-heading .glyphicon").stop(true, true).show("fast");
+	},
+	mouseleave: function() {
+		$(this).find(".panel-heading .glyphicon").stop(true, true).hide("fast");
+	}
+}, ".target-wrapper .panel");
+
+$(document).on("click", ".panel-heading .glyphicon-remove-sign", function() {
+	$currTargetWrapper = $(this).parents(".target-wrapper");
+	currId = $currTargetWrapper.attr("id").substr(1); 
+	$("#modal-remove-target .modal-body span").text(targets[currId]["mark"]);
+});
+
+$(document).on("click", "#modal-remove-target .confirm", function() {
+	var isReloadNeeded = (typeof targets[currId]["weibo"] !== "undefined") ? true : false;
+	delete targets[currId];
+	delete unreadStatuses[currId];
+	localStorage.setItem("targets", $.toJSON(targets));
+	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+	if (isReloadNeeded) {
+		backgroundPage.location.reload();
+	}
+	$currTargetWrapper.remove(); 	
+
+	$("#modal-remove-target").modal('hide');
+});
+
+$(document).on("click", "#btn-add", function() {
+	$("#modal-add-target input").val("");
+});
+
+$(document).on("click", "#modal-add-target .confirm", function() {
+	var inputVal = $("#modal-add-target input").val();
+	if (inputVal === "") {
+	} else {
+		var keys = getKeysFromObject(targets);
+		var id;
+		if (keys.length !== 0) {
+			id = Math.max.apply(null,keys) + 1;
 		} else {
-			var keys = getKeysFromObject(targets);
-			var id;
-			if (keys.length !== 0) {
-				id = Math.max.apply(null,keys) + 1;
-			} else {
-				id = 1;
-			}	
-			targets[id] = { "mark": inputVal };
-			unreadStatuses[id] = [];
-			localStorage.setItem("targets", $.toJSON(targets));
-			localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
-			$currTargetWrapper.attr("id", "t"+id);
-			$('#modal-add-target').modal('hide');
+			id = 1;
+		}	
+		targets[id] = { "mark": inputVal };
+		unreadStatuses[id] = [];
+		localStorage.setItem("targets", $.toJSON(targets));
+		localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+
+		$(".row-targets").append(targetHTML);
+		var currNum = getCountFromeObject(targets) - 1;
+		var $wrapper = $(".target-wrapper").eq(currNum);
+		$wrapper.attr("id", "t"+id);
+		$wrapper.find(".target-mark").text(targets[id]["mark"]);
+
+		$('#modal-add-target').modal('hide');
+	}
+});
+
+
+$(document).on("click", ".social-btn-first", function() {
+	$('#friend-inputor').val("");
+	$("#selected-friend-avatar").attr("src", "");
+	$("#selected-friend-name").text("");
+	$currTargetWrapper = $(this).parents(".target-wrapper");
+	/* remember to set a condition "undefined" for data.uid */
+	$.ajax({
+		url: "https://api.weibo.com/2/account/get_uid.json?source=5786724301",
+		type: "GET",
+		dataType: "json",
+		success: function(data) {
+			var uid = data.uid,
+				screenNames = [];
+			getAllScreenNames(uid, screenNames, 0);
+			$('#friend-inputor').typeahead({
+				source: screenNames,
+				updater: function(item) {
+					$.ajax({
+						url: "https://api.weibo.com/2/users/show.json?source=5786724301&screen_name="+item,
+						type: "GET",
+						dataType: "json",
+						success: function(data) {
+							$("#selected-friend-avatar").attr("src", data.avatar_large);
+							$("#selected-friend-name").text(item);
+							selectedTarget = data;
+						},
+						error: function(data) {
+							alert("Show Ajax Error");
+						}
+					});
+					return item;
+				}
+			});
+		},
+		error: function(data) {
+			alert("GetUid Ajax Error");
 		}
 	});
+});
 
-	$(".social-btn-first").click(function() {
-		$('#friend-inputor').val("");
-		$("#selected-friend-avatar").attr("src", "");
-		$("#selected-friend-name").text("");
-		$currTargetWrapper = $(this).parents(".target-wrapper");
-		$.ajax({
-			url: "https://api.weibo.com/2/account/get_uid.json?source=5786724301",
-			type: "GET",
-			dataType: "json",
-			success: function(data) {
-				var uid = data.uid,
-					screenNames = [];
-				getAllScreenNames(uid, screenNames, 0);
-				$('#friend-inputor').typeahead({
-					source: screenNames,
-					updater: function(item) {
-						$.ajax({
-							url: "https://api.weibo.com/2/users/show.json?source=5786724301&screen_name="+item,
-							type: "GET",
-							dataType: "json",
-							success: function(data) {
-								$("#selected-friend-avatar").attr("src", data.avatar_large);
-								$("#selected-friend-name").text(item);
-								selectedTarget = data;
-							},
-							error: function(data) {
-								alert("Show Ajax Error");
-							}
-						});
-						return item;
-					}
-				});
-			},
-			error: function(data) {
-				alert("GetUid Ajax Error");
-			}
-		});
-	});	
+$(document).on("click", "#target-modal .confirm", function() {
+	var id = $currTargetWrapper.attr("id").substr(1);
+	if ($("#selected-friend-name").text() !== "") {
+		targets[id]["weibo"] = {
+			"id": selectedTarget.id,
+			"screen_name": selectedTarget.screen_name,
+			"profile_image_url": selectedTarget.profile_image_url,
+			"avatar_large": selectedTarget.avatar_large
+		};
+		localStorage.setItem("targets", $.toJSON(targets));
+		backgroundPage.location.reload();
 
+		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["weibo"]["avatar_large"]);
 
-	$("#target-modal .confirm").click(function(){
-		var id = $currTargetWrapper.attr("id").substr(1);
-		if ($("#selected-friend-name").text() !== "") {
-			targets[id]["weibo"] = {
-				"id": selectedTarget.id,
-				"screen_name": selectedTarget.screen_name,
-				"profile_image_url": selectedTarget.profile_image_url,
-				"avatar_large": selectedTarget.avatar_large
-			};
-			localStorage.setItem("targets", $.toJSON(targets));
-			backgroundPage.location.reload();
-			$('#target-modal').modal('hide');
-		} else {
+		$('#target-modal').modal('hide');
+	} else {
 
-		}
-	});
-
+	}
 });
 
 function getAllScreenNames(uid, screenNames, cursor) {
@@ -133,4 +198,12 @@ function getKeysFromObject(obj) {
 		keys.push(parseInt(key));
 	}
 	return keys;
+}
+
+function getCountFromeObject(obj){
+	var count = 0;
+	for (var key in obj) {
+		count++;
+	}
+	return count;
 }

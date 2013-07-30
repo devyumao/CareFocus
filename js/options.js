@@ -1,11 +1,14 @@
 var targets,
-	unreadStatuses;
+	unreadStatuses,
+	checkPoint;
 if (localStorage.getItem("targets") !== null) {
 	targets = $.evalJSON(localStorage.getItem("targets"));
-	unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses")); 	
+	unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
+	checkPoint = $.evalJSON(localStorage.getItem("checkPoint")); 	
 } else {
 	targets = {};
 	unreadStatuses = {};
+	checkPoint = {};
 }
 
 var backgroundPage = chrome.extension.getBackgroundPage();
@@ -67,8 +70,11 @@ $(document).on("click", "#modal-remove-target .confirm", function() {
 	var isReloadNeeded = (typeof targets[currId]["weibo"] !== "undefined") ? true : false;
 	delete targets[currId];
 	delete unreadStatuses[currId];
+	delete checkPoint[currId];
 	localStorage.setItem("targets", $.toJSON(targets));
 	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
+
 	if (isReloadNeeded) {
 		backgroundPage.location.reload();
 	}
@@ -124,8 +130,10 @@ $(document).on("click", "#modal-add-target .confirm", function() {
 		}	
 		targets[id] = { "mark": inputVal };
 		unreadStatuses[id] = [];
+		checkPoint[id] = {}
 		localStorage.setItem("targets", $.toJSON(targets));
 		localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 
 		$(".row-targets").append(targetHTML);
 		var currNum = getCountFromeObject(targets) - 1;
@@ -187,7 +195,9 @@ $(document).on("click", "#target-modal .confirm", function() {
 			"profile_image_url": selectedTarget.profile_image_url,
 			"avatar_large": selectedTarget.avatar_large
 		};
+		checkPoint[id]["weibo"] = "";
 		localStorage.setItem("targets", $.toJSON(targets));
+		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();
 
 		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["weibo"]["avatar_large"]);

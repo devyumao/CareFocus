@@ -32,7 +32,6 @@ var targetHTML = '<div class="col-lg-2 target-wrapper">'
 
 
 $(document).ready(function() {
-
 	var originKeys = getKeysFromObject(targets).sort();
 	var $rowTargets = $(".row-targets");
 
@@ -46,7 +45,6 @@ $(document).ready(function() {
 			$wrapper.find(".target-avatar").attr("src", targets[key]["weibo"]["avatar_large"]);
 		}
 	}
-
 });
 
 
@@ -79,13 +77,43 @@ $(document).on("click", "#modal-remove-target .confirm", function() {
 	$("#modal-remove-target").modal('hide');
 });
 
+$(document).on("click", ".panel-heading .glyphicon-edit", function() {
+	$currTargetWrapper = $(this).parents(".target-wrapper");
+	currId = $currTargetWrapper.attr("id").substr(1); 
+	$("#modal-edit-target .modal-body input").val(targets[currId]["mark"]);
+});
+
+$(document).on("shown.bs.modal", "#modal-edit-target", function() {
+	$("#modal-edit-target .modal-body input").focus();
+});
+
+$(document).on("click", "#modal-edit-target .confirm", function() {
+	var inputVal = $.trim($("#modal-edit-target input").val());
+	if (inputVal === "") {
+
+	} else if (inputVal === targets[currId]["mark"]) {
+		$('#modal-edit-target').modal('hide');
+	} else if ($.inArray(inputVal, getMarksFromTargets(targets)) !== -1) {
+
+	} else {
+		targets[currId]["mark"] = inputVal;
+		localStorage.setItem("targets", $.toJSON(targets));
+		$currTargetWrapper.find(".target-mark").text(targets[currId]["mark"]);
+
+		$('#modal-edit-target').modal('hide');
+	}
+});
+
 $(document).on("click", "#btn-add", function() {
 	$("#modal-add-target input").val("");
 });
 
 $(document).on("click", "#modal-add-target .confirm", function() {
-	var inputVal = $("#modal-add-target input").val();
+	var inputVal = $.trim($("#modal-add-target input").val());
 	if (inputVal === "") {
+
+	} else if ($.inArray(inputVal, getMarksFromTargets(targets)) !== -1) {
+
 	} else {
 		var keys = getKeysFromObject(targets);
 		var id;
@@ -108,7 +136,6 @@ $(document).on("click", "#modal-add-target .confirm", function() {
 		$('#modal-add-target').modal('hide');
 	}
 });
-
 
 $(document).on("click", ".social-btn-first", function() {
 	$('#friend-inputor').val("");
@@ -152,7 +179,8 @@ $(document).on("click", ".social-btn-first", function() {
 
 $(document).on("click", "#target-modal .confirm", function() {
 	var id = $currTargetWrapper.attr("id").substr(1);
-	if ($("#selected-friend-name").text() !== "") {
+	/* information display condition */
+	if ($.trim($("#selected-friend-name").text()) !== "") {
 		targets[id]["weibo"] = {
 			"id": selectedTarget.id,
 			"screen_name": selectedTarget.screen_name,
@@ -206,4 +234,12 @@ function getCountFromeObject(obj){
 		count++;
 	}
 	return count;
+}
+
+function getMarksFromTargets(targets) {
+	var marks = [];
+	for (var key in targets) {
+		marks.push(targets[key]["mark"]);
+	}
+	return marks;
 }

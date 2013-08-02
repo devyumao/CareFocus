@@ -8,11 +8,7 @@
 	height: 150px;
 }
 
-#target-modal .modal-body {
-	height: 300px;
-}
-
-#selected-friend-avatar {
+.selected-friend-avatar {
 	width: 120px;
 	height: 120px;
 }

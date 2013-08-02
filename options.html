@@ -71,18 +71,40 @@
 		</div>
 	</div>
 
-	<div id="target-modal" class="modal fade in">
+	<div id="modal-weibo" class="modal fade in">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
 		  			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		  			<h3>选择ta的帐号</h3>
+		  			<h3>选择ta的新浪微博帐号</h3>
 				</div>
 				<div class="modal-body">
-					<input type="text" id="friend-inputor" autocomplete="off" />
-			  		<div id="selected-friend">
-			  			<img id="selected-friend-avatar" src="" />
-			  			<p id="selected-friend-name"></p>
+					<input type="text" class="friend-inputor" autocomplete="off" />
+			  		<div class="selected-friend">
+			  			<img class="selected-friend-avatar" src="" />
+			  			<p class="selected-friend-name"></p>
+			  		</div>
+				</div>
+				<div class="modal-footer">
+		  			<button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
+		  			<button class="btn btn-primary confirm">确认</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="modal-renren" class="modal fade in">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+		  			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		  			<h3>选择ta的人人帐号</h3>
+				</div>
+				<div class="modal-body">
+					<input type="text" class="friend-inputor" autocomplete="off" />
+			  		<div class="selected-friend">
+			  			<img class="selected-friend-avatar" src="" />
+			  			<p class="selected-friend-name"></p>
 			  		</div>
 				</div>
 				<div class="modal-footer">

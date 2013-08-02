@@ -1,14 +1,9 @@
-var targets,
-	unreadStatuses,
-	checkPoint;
+var weiboAppKey = "82966982";
+var renrenAccessToken = "239309|6.16895ace3b9af802b2c6a13c70dcbfd4.2592000.1378051200-0";
+
+var targets;
 if (localStorage.getItem("targets") !== null) {
-	targets = $.evalJSON(localStorage.getItem("targets"));
-	unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
-	checkPoint = $.evalJSON(localStorage.getItem("checkPoint")); 	
-} else {
-	targets = {};
-	unreadStatuses = {};
-	checkPoint = {};
+	targets = $.evalJSON(localStorage.getItem("targets"));	
 }
 
 var backgroundPage = chrome.extension.getBackgroundPage();
@@ -28,7 +23,8 @@ var targetHTML = '<div class="col-lg-2 target-wrapper">'
 	+	  		'<img class="target-avatar" />'
 	+	  	'</div>'
 	+  		'<div class="target-social-btns btn-group">'
-	+  			'<a href="#target-modal" class="btn btn-default social-btn-first" data-toggle="modal">wb</a>'
+	+  			'<a href="#modal-weibo" class="btn btn-default btn-weibo" data-toggle="modal">wb</a>'
+	+  			'<a href="#modal-renren" class="btn btn-default btn-renren" data-toggle="modal">rr</a>'
 	+  		'</div>'
 	+	'</div>'
 	+ '</div>';
@@ -50,7 +46,7 @@ $(document).ready(function() {
 	}
 });
 
-
+// panel hover
 $(document).on({
 	mouseenter: function() {
 		$(this).find(".panel-heading .glyphicon").stop(true, true).show("fast");
@@ -60,19 +56,30 @@ $(document).on({
 	}
 }, ".target-wrapper .panel");
 
+// REMOVE icon click
 $(document).on("click", ".panel-heading .glyphicon-remove-sign", function() {
 	$currTargetWrapper = $(this).parents(".target-wrapper");
 	currId = $currTargetWrapper.attr("id").substr(1); 
 	$("#modal-remove-target .modal-body span").text(targets[currId]["mark"]);
 });
 
+// REMOVE modal confirm
 $(document).on("click", "#modal-remove-target .confirm", function() {
 	var isReloadNeeded = (typeof targets[currId]["weibo"] !== "undefined") ? true : false;
+
 	delete targets[currId];
-	delete unreadStatuses[currId];
-	delete checkPoint[currId];
 	localStorage.setItem("targets", $.toJSON(targets));
+
+	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
+	var notifAmount = parseInt(localStorage.getItem("notifAmount") - unreadStatuses[currId].length);
+	localStorage.setItem("notifAmount", notifAmount);
+	chrome.browserAction.setBadgeText({text: (notifAmount === 0) ? "" : "" + notifAmount});
+
+	delete unreadStatuses[currId];
 	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+
+	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
+	delete checkPoint[currId];
 	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 
 	if (isReloadNeeded) {
@@ -83,16 +90,19 @@ $(document).on("click", "#modal-remove-target .confirm", function() {
 	$("#modal-remove-target").modal('hide');
 });
 
+// EDIT icon click
 $(document).on("click", ".panel-heading .glyphicon-edit", function() {
 	$currTargetWrapper = $(this).parents(".target-wrapper");
 	currId = $currTargetWrapper.attr("id").substr(1); 
 	$("#modal-edit-target .modal-body input").val(targets[currId]["mark"]);
 });
 
+// EDIT modal shown
 $(document).on("shown.bs.modal", "#modal-edit-target", function() {
 	$("#modal-edit-target .modal-body input").focus();
 });
 
+// EDIT modal confirm
 $(document).on("click", "#modal-edit-target .confirm", function() {
 	var inputVal = $.trim($("#modal-edit-target input").val());
 	if (inputVal === "") {
@@ -110,10 +120,12 @@ $(document).on("click", "#modal-edit-target .confirm", function() {
 	}
 });
 
+// ADD button click
 $(document).on("click", "#btn-add", function() {
 	$("#modal-add-target input").val("");
 });
 
+// ADD modal confirm
 $(document).on("click", "#modal-add-target .confirm", function() {
 	var inputVal = $.trim($("#modal-add-target input").val());
 	if (inputVal === "") {
@@ -129,7 +141,9 @@ $(document).on("click", "#modal-add-target .confirm", function() {
 			id = 1;
 		}	
 		targets[id] = { "mark": inputVal };
+		var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
 		unreadStatuses[id] = [];
+		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 		checkPoint[id] = {}
 		localStorage.setItem("targets", $.toJSON(targets));
 		localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
@@ -145,30 +159,35 @@ $(document).on("click", "#modal-add-target .confirm", function() {
 	}
 });
 
-$(document).on("click", ".social-btn-first", function() {
-	$('#friend-inputor').val("");
-	$("#selected-friend-avatar").attr("src", "");
-	$("#selected-friend-name").text("");
+// WEIBO button click
+$(document).on("click", ".btn-weibo", function() {
+	var $modalWeibo = $("#modal-weibo");
+	var $friendInputor = $modalWeibo.find(".friend-inputor");
+	var $friendAvatar = $modalWeibo.find(".selected-friend-avatar");
+	var $friendName = $modalWeibo.find(".selected-friend-name");
+	$friendInputor.val("");
+	$friendAvatar.attr("src", "");
+	$friendName.text("");
 	$currTargetWrapper = $(this).parents(".target-wrapper");
 	/* remember to set a condition "undefined" for data.uid */
 	$.ajax({
-		url: "https://api.weibo.com/2/account/get_uid.json?source=5786724301",
+		url: "https://api.weibo.com/2/account/get_uid.json?source="+weiboAppKey,
 		type: "GET",
 		dataType: "json",
 		success: function(data) {
 			var uid = data.uid,
 				screenNames = [];
 			getAllScreenNames(uid, screenNames, 0);
-			$('#friend-inputor').typeahead({
+			$friendInputor.typeahead({
 				source: screenNames,
 				updater: function(item) {
 					$.ajax({
-						url: "https://api.weibo.com/2/users/show.json?source=5786724301&screen_name="+item,
+						url: "https://api.weibo.com/2/users/show.json?source="+weiboAppKey+"&screen_name="+item,
 						type: "GET",
 						dataType: "json",
 						success: function(data) {
-							$("#selected-friend-avatar").attr("src", data.avatar_large);
-							$("#selected-friend-name").text(item);
+							$friendAvatar.attr("src", data.avatar_large);
+							$friendName.text(item);
 							selectedTarget = data;
 						},
 						error: function(data) {
@@ -185,16 +204,88 @@ $(document).on("click", ".social-btn-first", function() {
 	});
 });
 
-$(document).on("click", "#target-modal .confirm", function() {
+// RENREN button click
+$(document).on("click", ".btn-renren", function() {
+	var $modal = $("#modal-renren");
+	var $friendInputor = $modal.find(".friend-inputor");
+	var $friendAvatar = $modal.find(".selected-friend-avatar");
+	var $friendName = $modal.find(".selected-friend-name");
+	$friendInputor.val("");
+	$friendAvatar.attr("src", "");
+	$friendName.text("");
+	$currTargetWrapper = $(this).parents(".target-wrapper");
+	/* remember to set a condition "undefined" for data.uid */
+	$.ajax({
+		url: "https://api.renren.com/v2/user/login/get?access_token="+renrenAccessToken,
+		type: "GET",
+		dataType: "json",
+		success: function(data) {
+			var uid = data.response.id,
+				friends = [];
+
+			getRenrenFriends(uid, friends, 1);
+
+			$friendInputor.typeahead({
+				source: function (query, process) {
+				    states = [];
+				    map = {};
+				 	
+				    var data = [
+				        {"stateCode": "CA", "stateName": "California"},
+				        {"stateCode": "AZ", "stateName": "Arizona"},
+				        {"stateCode": "NY", "stateName": "New York"},
+				        {"stateCode": "NV", "stateName": "Nevada"},
+				        {"stateCode": "OH", "stateName": "Ohio"}
+				    ];
+				 
+				    $.each(data, function (i, state) {
+				        map[state.stateName] = state;
+				        states.push(state.stateName);
+				    });
+				 
+				    process(states);
+				}
+			});
+			//getAllScreenNames(uid, screenNames, 1);
+			/*$friendInputor.typeahead({
+				source: screenNames,
+				updater: function(item) {
+					$.ajax({
+						url: "https://api.weibo.com/2/users/show.json?source="+weiboAppKey+"&screen_name="+item,
+						type: "GET",
+						dataType: "json",
+						success: function(data) {
+							$friendAvatar.attr("src", data.avatar_large);
+							$friendName.text(item);
+							selectedTarget = data;
+						},
+						error: function(data) {
+							alert("Show Ajax Error");
+						}
+					});
+					return item;
+				}
+			});*/
+		},
+		error: function(data) {
+			alert("LoginGet Ajax Error");
+		}
+	});
+});
+
+
+// social confirm
+$(document).on("click", "#modal-weibo .confirm", function() {
 	var id = $currTargetWrapper.attr("id").substr(1);
 	/* information display condition */
-	if ($.trim($("#selected-friend-name").text()) !== "") {
+	if ($.trim($("#modal-weibo .selected-friend-name").text()) !== "") {
 		targets[id]["weibo"] = {
 			"id": selectedTarget.id,
 			"screen_name": selectedTarget.screen_name,
 			"profile_image_url": selectedTarget.profile_image_url,
 			"avatar_large": selectedTarget.avatar_large
 		};
+		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 		checkPoint[id]["weibo"] = "";
 		localStorage.setItem("targets", $.toJSON(targets));
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
@@ -202,15 +293,16 @@ $(document).on("click", "#target-modal .confirm", function() {
 
 		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["weibo"]["avatar_large"]);
 
-		$('#target-modal').modal('hide');
+		$('#modal-weibo').modal('hide');
 	} else {
 
 	}
 });
 
+
 function getAllScreenNames(uid, screenNames, cursor) {
 	$.ajax({
-		url: "https://api.weibo.com/2/friendships/friends.json?source=5786724301&uid="+uid+"&count=100&cursor="+cursor,
+		url: "https://api.weibo.com/2/friendships/friends.json?source="+weiboAppKey+"&uid="+uid+"&count=100&cursor="+cursor,
 		type: "GET",
 		dataType: "json",
 		success: function(data) {
@@ -226,6 +318,26 @@ function getAllScreenNames(uid, screenNames, cursor) {
 		},
 		error: function(data) {
 			alert("Friends Ajax Error");
+		}
+	});
+}
+
+function getRenrenFriends(uid, friends, pageNum) {
+	$.ajax({
+		url: "https://api.renren.com/v2/user/friend/list?access_token="+renrenAccessToken+"&userId="+uid+"&pageSize=100&cpageNumber="+pageNum,
+		type: "GET",
+		dataType: "json",
+		success: function(data) {
+			alert("fff");
+			var len = data.response.length;
+			if (0 === len) { 
+				alert(friends.length);
+			} else {
+				//getRenrenFriends(uid, friends.concat(data.response), pageNum + 1);
+			}
+		},
+		error: function(data) {
+			alert("FriendList Ajax Error");
 		}
 	});
 }

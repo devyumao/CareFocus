@@ -1,15 +1,19 @@
-var notifAmount;
-if (localStorage.getItem("notifAmount") !== null) {
-	notifAmount = parseInt(localStorage.getItem("notifAmount"));
-	chrome.browserAction.setBadgeText({text: "" + notifAmount}); 	
-} else {
-	notifAmount = 0;
-}
- 
+var weiboAppKey = "82966982";
 
-if (localStorage.getItem("targets") !== null) {
+if(localStorage.length === 0) {
+	localStorage.setItem("notifAmount", "0");
+	localStorage.setItem("targets", $.toJSON({}));
+	localStorage.setItem("checkPoint", $.toJSON({}));
+	localStorage.setItem("unreadStatuses", $.toJSON({}));
+} else {
+	var originNotif = parseInt((localStorage.getItem("notifAmount")));
+	if(originNotif === 0) {
+		chrome.browserAction.setBadgeText({text: ""});
+	} else {
+		chrome.browserAction.setBadgeText({text: "" + originNotif});
+	}
+
 	var targets = $.evalJSON(localStorage.getItem("targets"));
-	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 	for (var key in targets) {
 		if(typeof targets[key]["weibo"] !== "undefined") {
@@ -18,16 +22,18 @@ if (localStorage.getItem("targets") !== null) {
 	}
 }
 
-
 function checkWeiboUpdate(key, uid) {
 	return function() {
 		$.ajax({
-			url: "https://api.weibo.com/2/statuses/user_timeline.json?source=5786724301&uid="+uid+"&trim_user=0",
+			url: "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+uid+"&trim_user=0",
 			type: "GET",
 			dataType: "json",
 			success: function(data) {
-				console.log(uid + ": " + Date());
-				var isStatusesUpdated = false;
+				console.log(key + ": " + Date());
+
+				var unreadStatuses, 
+					notifAmount;
+
 				if (checkPoint[key]["weibo"] !== "") {
 					var lastCheckPoint = new Date(checkPoint[key]["weibo"]);
 					for (var i = 0; i < data.statuses.length; i++) {
@@ -38,9 +44,13 @@ function checkWeiboUpdate(key, uid) {
 								checkPoint[key]["weibo"] = status.created_at;
 								localStorage.setItem("checkPoint", $.toJSON(checkPoint));	
 							}
+							unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
 							unreadStatuses[key].push({type: "weibo", data: status});
-							notifAmount++;
-							isStatusesUpdated = true;
+							localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+
+							notifAmount = parseInt((localStorage.getItem("notifAmount")));
+							localStorage.setItem("notifAmount", ++notifAmount);
+
 						} else {
 							break;
 						}
@@ -53,24 +63,19 @@ function checkWeiboUpdate(key, uid) {
 					localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 				}
 
+				notifAmount = parseInt((localStorage.getItem("notifAmount")));
 				if(notifAmount === 0) {
 					chrome.browserAction.setBadgeText({text: ""});
 				} else {
 					chrome.browserAction.setBadgeText({text: "" + notifAmount});
-				}
-
-				if (isStatusesUpdated) {
-					localStorage.setItem("notifAmount", notifAmount);
-					localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
-				}
-				
+				}			
 			},
 			error: function(data) {
 				alert("UserTimeLine Ajax Error");
 			}
 		});
 
-		setTimeout(checkWeiboUpdate(key, uid), 10000);
+		setTimeout(checkWeiboUpdate(key, uid), 30000);
 	};
 	
 }

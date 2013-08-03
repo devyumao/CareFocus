@@ -1,5 +1,5 @@
 var weiboAppKey = "82966982";
-var renrenAccessToken = "239309|6.16895ace3b9af802b2c6a13c70dcbfd4.2592000.1378051200-0";
+var renrenAccessToken = "239309%7C6.402c6ec451f9faf2b9b51cbfa757e216.2592000.1378130400-702002529";
 
 var targets;
 if (localStorage.getItem("targets") !== null) {
@@ -41,7 +41,7 @@ $(document).ready(function() {
 		$wrapper.attr("id", "t"+key);
 		$wrapper.find(".target-mark").text(targets[key]["mark"]);
 		if (typeof targets[key]["weibo"] !== "undefined") {
-			$wrapper.find(".target-avatar").attr("src", targets[key]["weibo"]["avatar_large"]);
+			$wrapper.find(".target-avatar").attr("src", targets[key]["weibo"]["avatar"]);
 		}
 	}
 });
@@ -206,13 +206,10 @@ $(document).on("click", ".btn-weibo", function() {
 
 // RENREN button click
 $(document).on("click", ".btn-renren", function() {
-	var $modal = $("#modal-renren");
-	var $friendInputor = $modal.find(".friend-inputor");
-	var $friendAvatar = $modal.find(".selected-friend-avatar");
-	var $friendName = $modal.find(".selected-friend-name");
-	$friendInputor.val("");
-	$friendAvatar.attr("src", "");
-	$friendName.text("");
+	var $modalRenren = $("#modal-renren");
+	$modalRenren.find(".friend-inputor").val("");
+	$modalRenren.find(".selected-friend-avatar").attr("src", "");
+	$modalRenren.find(".selected-friend-name").text("");
 	$currTargetWrapper = $(this).parents(".target-wrapper");
 	/* remember to set a condition "undefined" for data.uid */
 	$.ajax({
@@ -224,48 +221,6 @@ $(document).on("click", ".btn-renren", function() {
 				friends = [];
 
 			getRenrenFriends(uid, friends, 1);
-
-			$friendInputor.typeahead({
-				source: function (query, process) {
-				    states = [];
-				    map = {};
-				 	
-				    var data = [
-				        {"stateCode": "CA", "stateName": "California"},
-				        {"stateCode": "AZ", "stateName": "Arizona"},
-				        {"stateCode": "NY", "stateName": "New York"},
-				        {"stateCode": "NV", "stateName": "Nevada"},
-				        {"stateCode": "OH", "stateName": "Ohio"}
-				    ];
-				 
-				    $.each(data, function (i, state) {
-				        map[state.stateName] = state;
-				        states.push(state.stateName);
-				    });
-				 
-				    process(states);
-				}
-			});
-			//getAllScreenNames(uid, screenNames, 1);
-			/*$friendInputor.typeahead({
-				source: screenNames,
-				updater: function(item) {
-					$.ajax({
-						url: "https://api.weibo.com/2/users/show.json?source="+weiboAppKey+"&screen_name="+item,
-						type: "GET",
-						dataType: "json",
-						success: function(data) {
-							$friendAvatar.attr("src", data.avatar_large);
-							$friendName.text(item);
-							selectedTarget = data;
-						},
-						error: function(data) {
-							alert("Show Ajax Error");
-						}
-					});
-					return item;
-				}
-			});*/
 		},
 		error: function(data) {
 			alert("LoginGet Ajax Error");
@@ -274,16 +229,15 @@ $(document).on("click", ".btn-renren", function() {
 });
 
 
-// social confirm
+// WEIBO modal confirm
 $(document).on("click", "#modal-weibo .confirm", function() {
 	var id = $currTargetWrapper.attr("id").substr(1);
 	/* information display condition */
-	if ($.trim($("#modal-weibo .selected-friend-name").text()) !== "") {
+	if ($("#modal-weibo .selected-friend-name").text() !== "") {
 		targets[id]["weibo"] = {
 			"id": selectedTarget.id,
-			"screen_name": selectedTarget.screen_name,
-			"profile_image_url": selectedTarget.profile_image_url,
-			"avatar_large": selectedTarget.avatar_large
+			"name": selectedTarget.screen_name,
+			"avatar": selectedTarget.avatar_large
 		};
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 		checkPoint[id]["weibo"] = "";
@@ -291,9 +245,33 @@ $(document).on("click", "#modal-weibo .confirm", function() {
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();
 
-		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["weibo"]["avatar_large"]);
+		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["weibo"]["avatar"]);
 
-		$('#modal-weibo').modal('hide');
+		$("#modal-weibo").modal("hide");
+	} else {
+
+	}
+});
+
+// WEIBO modal confirm
+$(document).on("click", "#modal-renren .confirm", function() {
+	var id = $currTargetWrapper.attr("id").substr(1);
+	/* information display condition */
+	if ($("#modal-renren .selected-friend-name").text() !== "") {
+		targets[id]["renren"] = {
+			"id": selectedTarget.id,
+			"name": selectedTarget.name,
+			"avatar": selectedTarget.avatar[2].url
+		};
+		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
+		checkPoint[id]["renren"] = "";
+		localStorage.setItem("targets", $.toJSON(targets));
+		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
+		backgroundPage.location.reload();
+
+		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["renren"]["avatar_large"]);
+
+		$("#modal-renren").modal("hide");
 	} else {
 
 	}
@@ -324,16 +302,41 @@ function getAllScreenNames(uid, screenNames, cursor) {
 
 function getRenrenFriends(uid, friends, pageNum) {
 	$.ajax({
-		url: "https://api.renren.com/v2/user/friend/list?access_token="+renrenAccessToken+"&userId="+uid+"&pageSize=100&cpageNumber="+pageNum,
+		url: "https://api.renren.com/v2/user/friend/list?access_token="+renrenAccessToken+"&userId="+uid+"&pageSize=100&pageNumber="+pageNum,
 		type: "GET",
 		dataType: "json",
 		success: function(data) {
-			alert("fff");
-			var len = data.response.length;
-			if (0 === len) { 
-				alert(friends.length);
+			if (0 === data.response.length) {
+				var names, map;
+				var $modalRenren = $("#modal-renren");
+
+				$("#modal-renren .friend-inputor").typeahead({
+					source: function(query, process) {
+					    names = [];
+					    map = {};
+
+					    $.each(friends, function (i, friend) {
+					        map[friend.id] = friend;
+					        names.push(friend.name+"\t<span>"+friend.id+"</span>");
+					    });
+
+					    process(names);
+					},
+
+					updater: function(item) {
+						var nameAndId = item.split("\t");
+						var name = nameAndId[0];
+						var id = nameAndId[1].match(/[0-9]+/);
+
+						selectedTarget = map[id];
+						$modalRenren.find(".selected-friend-avatar").attr("src", selectedTarget.avatar[2].url);
+						$modalRenren.find(".selected-friend-name").text(name);
+
+					    return name;
+					}
+				});
 			} else {
-				//getRenrenFriends(uid, friends.concat(data.response), pageNum + 1);
+				getRenrenFriends(uid, friends.concat(data.response), pageNum + 1);
 			}
 		},
 		error: function(data) {

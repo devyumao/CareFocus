@@ -20,3 +20,7 @@
 
 .panel-heading .glyphicon-remove-sign {
 }
+
+#modal-renren .typeahead a span {
+	display: none;
+}

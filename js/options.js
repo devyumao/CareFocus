@@ -1,5 +1,8 @@
 var weiboAppKey = "82966982";
-var renrenAccessToken = "239309%7C6.402c6ec451f9faf2b9b51cbfa757e216.2592000.1378130400-702002529";
+
+var renrenApiKey = "6c094cc7a9634012825a8fddd92dddec";
+var renrenRedirectUri = "http://graph.renren.com/oauth/login_success.html";
+var renrenAccessToken = (localStorage.getItem("renrenAccessToken") !== null) ? localStorage.getItem("renrenAccessToken") : "";
 
 var targets;
 if (localStorage.getItem("targets") !== null) {
@@ -240,7 +243,7 @@ $(document).on("click", "#modal-weibo .confirm", function() {
 			"avatar": selectedTarget.avatar_large
 		};
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
-		checkPoint[id]["weibo"] = " ";
+		checkPoint[id]["weibo"] = "";
 		localStorage.setItem("targets", $.toJSON(targets));
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();
@@ -264,7 +267,7 @@ $(document).on("click", "#modal-renren .confirm", function() {
 			"avatar": selectedTarget.avatar[2].url
 		};
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
-		checkPoint[id]["renren"] = " ";
+		checkPoint[id]["renren"] = "";
 		localStorage.setItem("targets", $.toJSON(targets));
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();
@@ -277,6 +280,9 @@ $(document).on("click", "#modal-renren .confirm", function() {
 	}
 });
 
+$(document).on("click", "#modal-renren .oauth", function() {
+	window.open("https://graph.renren.com/oauth/authorize?client_id="+renrenApiKey+"&redirect_uri="+renrenRedirectUri+"&response_type=code&scope=read_user_feed");
+});
 
 function getAllScreenNames(uid, screenNames, cursor) {
 	$.ajax({

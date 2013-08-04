@@ -12,11 +12,17 @@
     "scripts": ["js/jquery.js", "js/jquery.json.js", "js/background.js"]
   },
   "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["http://graph.renren.com/oauth/login_success.html?code=*"],
+      "css": ["css/content.css"],
+      "js": ["js/content.js"]
+    }
+  ],
   "permissions": [
     "http://*/*",
     "https://*/*",
     "tabs",
     "storage"
-  ],
-  "content_security_policy": "script-src 'self'; object-src 'self'"
+  ]
 }

@@ -1,5 +1,31 @@
 var weiboAppKey = "82966982";
-var renrenAccessToken = "239309%7C6.402c6ec451f9faf2b9b51cbfa757e216.2592000.1378130400-702002529";
+
+var renrenApiKey = "6c094cc7a9634012825a8fddd92dddec",
+	renrenSecretKey = "09a3306b0b0e466b8e06d5bbe15a3369",
+	renrenRedirectUri = "http://graph.renren.com/oauth/login_success.html",
+	renrenRefreshToken,
+	renrenAccessToken;
+
+
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+	if (request.key === "renrenCode") {
+		$.ajax({
+			url: "https://graph.renren.com/oauth/token?grant_type=authorization_code&client_id="+renrenApiKey+"&redirect_uri="+renrenRedirectUri+"&client_secret="+renrenSecretKey+"&code="+request.value,
+			type: "GET",
+			dataType: "json",
+			success: function(data) {
+				localStorage.setItem("renrenAccessToken", data.access_token);
+				localStorage.setItem("renrenRefreshToken", data.refresh_token);
+				window.location.reload();
+			},
+			error: function(data) {
+				alert("RenrenOauthCode Ajax Error");
+			}
+		});
+	}
+});
+
 
 if(localStorage.length === 0) {
 	localStorage.setItem("notifAmount", "0");
@@ -16,6 +42,31 @@ if(localStorage.length === 0) {
 
 	var targets = $.evalJSON(localStorage.getItem("targets"));
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
+
+	if (localStorage.getItem("renrenRefreshToken") !== null) {
+		renrenRefreshToken = localStorage.getItem("renrenRefreshToken");
+		$.ajax({
+			url: "https://graph.renren.com/oauth/token?grant_type=refresh_token&refresh_token="+renrenRefreshToken+"&client_id="+renrenApiKey+"&client_secret="+renrenSecretKey,
+			type: "GET",
+			dataType: "json",
+			success: function(data) {
+				localStorage.setItem("renrenAccessToken", data.access_token);
+				renrenAccessToken = data.access_token;
+				checkAllStatusesUpdate();
+			},
+			error: function(data) {
+				renrenAccessToken = localStorage.getItem("renrenAccessToken");
+				checkAllStatusesUpdate();
+				alert("RenrenOauthRefresh Ajax Error");
+			}
+		});
+	} else {
+		checkAllStatusesUpdate();
+	}
+}
+
+
+function checkAllStatusesUpdate() {
 	for (var key in targets) {
 		for (var social in targets[key]) {
 			if (social !== "mark") {	
@@ -30,6 +81,7 @@ if(localStorage.length === 0) {
 					default:
 						break;
 				}
+				console.log(apiURL);
 				checkStatusesUpdate(key, apiURL, social)(); 
 			}
 		}
@@ -66,7 +118,7 @@ function checkStatusesUpdate(key, apiURL, social) {
 				}
 
 
-				if (checkPoint[key][social] !== " ") {
+				if (checkPoint[key][social] !== "") {
 					var lastCheckPoint = new Date(checkPoint[key][social]);
 
 					for (var i = 0; i < statuses.length; i++) {
@@ -89,10 +141,10 @@ function checkStatusesUpdate(key, apiURL, social) {
 						}
 					}
 				} else if (typeof statuses[0] !== "undefined") {
-					alert($.toJSON(statuses[0]));
+					checkPoint[key][social] = statuses[0][timestamp];
 					localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 				} else {
-					checkPoint[key][social] = new Date();
+					checkPoint[key][social] = new Date(); // set a date avant
 					localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 				}
 
@@ -104,7 +156,7 @@ function checkStatusesUpdate(key, apiURL, social) {
 				}	
 			},
 			error: function(data) {
-				alert("UserTimeLine Ajax Error: " + key + ", " + social);
+				console.log("UserTimeLine Ajax Error: " + key + ", " + social);
 			}
 		});
 

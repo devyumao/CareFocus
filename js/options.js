@@ -240,7 +240,7 @@ $(document).on("click", "#modal-weibo .confirm", function() {
 			"avatar": selectedTarget.avatar_large
 		};
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
-		checkPoint[id]["weibo"] = "";
+		checkPoint[id]["weibo"] = " ";
 		localStorage.setItem("targets", $.toJSON(targets));
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();
@@ -264,7 +264,7 @@ $(document).on("click", "#modal-renren .confirm", function() {
 			"avatar": selectedTarget.avatar[2].url
 		};
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
-		checkPoint[id]["renren"] = "";
+		checkPoint[id]["renren"] = " ";
 		localStorage.setItem("targets", $.toJSON(targets));
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();

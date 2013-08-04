@@ -1,4 +1,5 @@
 var weiboAppKey = "82966982";
+var renrenAccessToken = "239309%7C6.402c6ec451f9faf2b9b51cbfa757e216.2592000.1378130400-702002529";
 
 if(localStorage.length === 0) {
 	localStorage.setItem("notifAmount", "0");
@@ -16,36 +17,68 @@ if(localStorage.length === 0) {
 	var targets = $.evalJSON(localStorage.getItem("targets"));
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 	for (var key in targets) {
-		if(typeof targets[key]["weibo"] !== "undefined") {
-			checkWeiboUpdate(key, targets[key]["weibo"]["id"])();
+		for (var social in targets[key]) {
+			if (social !== "mark") {	
+				var apiURL;
+				switch (social) {
+					case "weibo":
+						apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&trim_user=1";
+						break;
+					case "renren":
+						apiURL = "https://api.renren.com/v2/feed/list?access_token="+renrenAccessToken+"&userId="+targets[key][social]["id"];
+						break;
+					default:
+						break;
+				}
+				checkStatusesUpdate(key, apiURL, social)(); 
+			}
 		}
 	}
 }
 
-function checkWeiboUpdate(key, uid) {
+
+function checkStatusesUpdate(key, apiURL, social) {
 	return function() {
 		$.ajax({
-			url: "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+uid+"&trim_user=0",
+			url: apiURL,
 			type: "GET",
 			dataType: "json",
 			success: function(data) {
-				console.log(key + ": " + Date());
+
+				console.log(key + "-" + social + ": " + Date());
 
 				var unreadStatuses, 
 					notifAmount;
 
-				if (checkPoint[key]["weibo"] !== "") {
-					var lastCheckPoint = new Date(checkPoint[key]["weibo"]);
-					for (var i = 0; i < data.statuses.length; i++) {
-						var status = data.statuses[i];
-						var createdAt = new Date(status.created_at);
+				var statuses,
+					timestamp;
+				switch (social) {
+					case "weibo":
+						statuses = data.statuses;
+						timestamp = "created_at";
+						break;
+					case "renren":
+						statuses = data.response;
+						timestamp = "time";
+						break;
+					default:
+						break;
+				}
+
+
+				if (checkPoint[key][social] !== " ") {
+					var lastCheckPoint = new Date(checkPoint[key][social]);
+
+					for (var i = 0; i < statuses.length; i++) {
+						var status = statuses[i];
+						var createdAt = new Date(status[timestamp]);
 						if (createdAt > lastCheckPoint) {
 							if(0 === i) {
-								checkPoint[key]["weibo"] = status.created_at;
+								checkPoint[key][social] = status[timestamp];
 								localStorage.setItem("checkPoint", $.toJSON(checkPoint));	
 							}
 							unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
-							unreadStatuses[key].push({type: "weibo", data: status});
+							unreadStatuses[key].push({type: social, data: status});
 							localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
 
 							notifAmount = parseInt((localStorage.getItem("notifAmount")));
@@ -55,11 +88,11 @@ function checkWeiboUpdate(key, uid) {
 							break;
 						}
 					}
-				} else if (typeof data.statuses[0] !== "undefined") {
-					checkPoint[key]["weibo"] = data.statuses[0].created_at;
+				} else if (typeof statuses[0] !== "undefined") {
+					alert($.toJSON(statuses[0]));
 					localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 				} else {
-					checkPoint[key]["weibo"] = new Date();
+					checkPoint[key][social] = new Date();
 					localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 				}
 
@@ -68,14 +101,14 @@ function checkWeiboUpdate(key, uid) {
 					chrome.browserAction.setBadgeText({text: ""});
 				} else {
 					chrome.browserAction.setBadgeText({text: "" + notifAmount});
-				}			
+				}	
 			},
 			error: function(data) {
-				alert("UserTimeLine Ajax Error");
+				alert("UserTimeLine Ajax Error: " + key + ", " + social);
 			}
 		});
 
-		setTimeout(checkWeiboUpdate(key, uid), 30000);
+		setTimeout(checkStatusesUpdate(key, apiURL, social), 30000);
 	};
 	
 }

@@ -1,4 +1,61 @@
-.tabbable {
-	width: 500px;
+html, body{
+	width: 550px;
 	height: 600px;
+	font-size: 13px;
+	overflow-y: auto;
+}
+
+.tab-content {
+	padding: 10px 10px 0 10px;
+}
+
+.item-avatar {
+	margin-top: 0;
+	float: left;
+}
+
+.item-status {
+	margin-left: 60px;
+}
+
+.item-more {
+	float: right;
+} 
+
+.clear {
+	clear: both;
+}
+
+.item-pic img, .retweeted-pic img {
+	float: left;
+	margin-right: 10px;
+	margin-bottom: 10px;
+}
+
+.well {
+	background-color: white; 
+	margin-top: 5px;
+	margin-bottom: 10px;
+	padding: 10px 12px 8px 12px;
+}
+
+.item-retweeted .well {
+	margin-bottom: 3px;
+} 
+
+.close {
+	position: relative;
+	top: -5px;
+}
+
+.item-header, .retweeted-header {
+	margin-bottom: 5px;
+}
+
+.item-owner, .retweeted-owner{
+	margin-right: 10px;
+}
+
+.item-footer {
+	margin-top: 5px;
 }

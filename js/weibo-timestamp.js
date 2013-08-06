@@ -61,14 +61,14 @@ function weibo_timestamps(time){
         ret = parseInt((iNow - iTrueTime) / ONE_MINUTE) + "分钟前";
     } else if( iTrueTime > iNow - ONE_DAY){
         // e.g. 今天11:39
-        ret = "今天" + dTrueTime.getHours() + ":" + dTrueTime.getMinutes();
+        ret = "今天 " + dTrueTime.getHours() + ":" + ((dTrueTime.getMinutes() < 10) ? "0" : "") + dTrueTime.getMinutes();
     } else{
         if(dTrueTime.getYear() == dNow.getYear()){
             // e.g. 9月10日 07:50
-            ret = dTrueTime.getMonth() + "月" + dTrueTime.getDate() + "日 " + dTrueTime.getHours() + ":" + dTrueTime.getMinutes();
+            ret = dTrueTime.getMonth() + "月" + dTrueTime.getDate() + "日 " + dTrueTime.getHours() + ":" + ((dTrueTime.getMinutes() < 10) ? "0" : "") + dTrueTime.getMinutes();
         }else{
             // e.g. 2011年2月3日 12:39
-            ret = dTrueTime.getFullYear() + "年" + dTrueTime.getMonth() + "月" + dTrueTime.getDate() + "日 " + dTrueTime.getHours() + ":" + dTrueTime.getMinutes();
+            ret = dTrueTime.getFullYear() + "年" + dTrueTime.getMonth() + "月" + dTrueTime.getDate() + "日 " + dTrueTime.getHours() + ":" + ((dTrueTime.getMinutes() < 10) ? "0" : "") + dTrueTime.getMinutes();
         }
     }
 
@@ -76,4 +76,4 @@ function weibo_timestamps(time){
 }
 
 
-module.exports = weibo_timestamps;
+// module.exports = weibo_timestamps;

@@ -73,7 +73,7 @@ function checkAllStatusesUpdate() {
 				var apiURL;
 				switch (social) {
 					case "weibo":
-						apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&trim_user=1";
+						apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&trim_user=0";
 						break;
 					case "renren":
 						apiURL = "https://api.renren.com/v2/feed/list?access_token="+renrenAccessToken+"&userId="+targets[key][social]["id"];
@@ -130,7 +130,7 @@ function checkStatusesUpdate(key, apiURL, social) {
 								localStorage.setItem("checkPoint", $.toJSON(checkPoint));	
 							}
 							unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
-							unreadStatuses[key].push({type: social, data: status});
+							unreadStatuses[key].push({"type": social, "data": status});
 							localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
 
 							notifAmount = parseInt((localStorage.getItem("notifAmount")));

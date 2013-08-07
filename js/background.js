@@ -130,7 +130,11 @@ function checkStatusesUpdate(key, apiURL, social) {
 								localStorage.setItem("checkPoint", $.toJSON(checkPoint));	
 							}
 							unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
-							unreadStatuses[key].push({"type": social, "data": status});
+							unreadStatuses[key][social+"-"+status.id] = {
+								"type": social, 
+								"timestamp": status[timestamp], 
+								"data": status
+							};
 							localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
 
 							notifAmount = parseInt((localStorage.getItem("notifAmount")));

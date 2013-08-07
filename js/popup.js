@@ -38,6 +38,8 @@ retweetedHTML = '<div class="item-retweeted well">'
 $(document).ready(function() {
 	console.log("Ready");
 
+	// $(".tab-content").css("background-image", "url(" + chrome.extension.getURL("img/grey-cloth.png") + ")");
+
 	if (localStorage.getItem("unreadStatuses") !== null && localStorage.getItem("unreadStatuses") !== "{}") {		
 		var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
 		var targets = $.evalJSON(localStorage.getItem("targets"));
@@ -50,7 +52,7 @@ $(document).ready(function() {
 			var target = targets[key];
 			$navTabs.append(
 				"<li class='" + (isFirstKey ? "active" : "") + "'>" 
-				+ "<a href='#t" + key + "' data-toggle='tab'>" + target["mark"] + "</a>" 
+				+ "<a href='#t" + key + "' data-toggle='tab'><span class='tab-name'>" + target["mark"] + "</span><span class='badge'>1</span></a>" 
 				+ "</li>"
 			);
 
@@ -59,15 +61,20 @@ $(document).ready(function() {
 			);
 
 			var targetStatuses = unreadStatuses[key];
+			var sortedSids = getSortedKeysByTime(targetStatuses);
+
 			var $tabPane = $("#t"+key);
 
-			for (var i = targetStatuses.length - 1; i >= 0; i--) {
-				var status = targetStatuses[i].data;
+			for (var i = 0; i < sortedSids.length; i++) {
+				var sid = sortedSids[i];
+				var status = targetStatuses[sid].data;
 
 				$tabPane.append(itemHTML);
 				var $itemWrapper = $tabPane.find(".item-wrapper").last();
 
-				if (targetStatuses[i].type === "weibo") {
+				$itemWrapper.attr("id", sid);
+
+				if (targetStatuses[sid].type === "weibo") {
 					var ownerURL = siteURL["weibo"] + "u/" + status.user.id;
 
 					$itemWrapper.find(".item-avatar img").attr("src", status.user.profile_image_url);
@@ -113,3 +120,22 @@ $(document).ready(function() {
 	}
 });
 
+
+function sortTime(a, b) {
+	return new Date(b.time) - new Date(a.time);
+}
+
+function getSortedKeysByTime(statuses) {
+	var arr = [];
+	for (var key in statuses) {
+		arr.push({"key": key, "time": statuses[key].timestamp});
+	}
+	arr.sort(sortTime);
+
+	var res = [];
+	for (var i = 0; i < arr.length; i++) {
+		res.push(arr[i].key);
+	}
+	
+	return res;
+}

@@ -1,8 +1,25 @@
 html, body{
 	width: 550px;
 	height: 600px;
-	font-size: 13px;
 	overflow-y: auto;
+}
+
+body {
+	font-size: 12px;
+	padding-top: 38px;
+}
+
+.nav .tab-name {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.nav .badge {
+	background-color: #d9534f;
+	position: absolute;
+	z-index: 100;
+	top: 2px;
+	right: 0px;
 }
 
 .tab-content {
@@ -54,6 +71,7 @@ html, body{
 
 .item-owner, .retweeted-owner{
 	margin-right: 10px;
+	font-weight: bold;
 }
 
 .item-footer {

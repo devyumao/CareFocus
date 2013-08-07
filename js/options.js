@@ -74,7 +74,7 @@ $(document).on("click", "#modal-remove-target .confirm", function() {
 	localStorage.setItem("targets", $.toJSON(targets));
 
 	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
-	var notifAmount = parseInt(localStorage.getItem("notifAmount") - unreadStatuses[currId].length);
+	var notifAmount = parseInt(localStorage.getItem("notifAmount") - getCountFromeObject(unreadStatuses[currId]));
 	localStorage.setItem("notifAmount", notifAmount);
 	chrome.browserAction.setBadgeText({text: (notifAmount === 0) ? "" : "" + notifAmount});
 
@@ -145,7 +145,7 @@ $(document).on("click", "#modal-add-target .confirm", function() {
 		}	
 		targets[id] = { "mark": inputVal };
 		var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
-		unreadStatuses[id] = [];
+		unreadStatuses[id] = {};
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 		checkPoint[id] = {}
 		localStorage.setItem("targets", $.toJSON(targets));

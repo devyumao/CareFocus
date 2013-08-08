@@ -1,5 +1,5 @@
 html, body{
-	width: 550px;
+	width: 500px;
 	height: 600px;
 	overflow-y: auto;
 }
@@ -47,6 +47,8 @@ body {
 	float: left;
 	margin-right: 10px;
 	margin-bottom: 10px;
+	max-width: 120px;
+	max-height: 100px;
 }
 
 .well {
@@ -76,4 +78,12 @@ body {
 
 .item-footer {
 	margin-top: 5px;
+}
+
+.retweeted-title, .item-title {
+	font-weight: bold;
+}
+
+.item-title {
+	margin-bottom: 5px;
 }

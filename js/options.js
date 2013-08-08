@@ -68,7 +68,7 @@ $(document).on("click", ".panel-heading .glyphicon-remove-sign", function() {
 
 // REMOVE modal confirm
 $(document).on("click", "#modal-remove-target .confirm", function() {
-	var isReloadNeeded = (typeof targets[currId]["weibo"] !== "undefined") ? true : false;
+	// var isReloadNeeded = (typeof targets[currId]["weibo"] !== "undefined") ? true : false;
 
 	delete targets[currId];
 	localStorage.setItem("targets", $.toJSON(targets));
@@ -76,7 +76,7 @@ $(document).on("click", "#modal-remove-target .confirm", function() {
 	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
 	var notifAmount = parseInt(localStorage.getItem("notifAmount") - getCountFromeObject(unreadStatuses[currId]));
 	localStorage.setItem("notifAmount", notifAmount);
-	chrome.browserAction.setBadgeText({text: (notifAmount === 0) ? "" : "" + notifAmount});
+	chrome.browserAction.setBadgeText({text: (notifAmount > 0) ? "" + notifAmount : ""});
 
 	delete unreadStatuses[currId];
 	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
@@ -85,9 +85,11 @@ $(document).on("click", "#modal-remove-target .confirm", function() {
 	delete checkPoint[currId];
 	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 
-	if (isReloadNeeded) {
+	/*if (isReloadNeeded) {
 		backgroundPage.location.reload();
-	}
+	}*/
+	backgroundPage.location.reload();
+
 	$currTargetWrapper.remove(); 	
 
 	$("#modal-remove-target").modal('hide');
@@ -264,10 +266,11 @@ $(document).on("click", "#modal-renren .confirm", function() {
 		targets[id]["renren"] = {
 			"id": selectedTarget.id,
 			"name": selectedTarget.name,
-			"avatar": selectedTarget.avatar[2].url
+			"avatar": selectedTarget.avatar
 		};
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 		checkPoint[id]["renren"] = "";
+		checkPoint[id]["renrenSimple"] = "";
 		localStorage.setItem("targets", $.toJSON(targets));
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();
@@ -281,7 +284,7 @@ $(document).on("click", "#modal-renren .confirm", function() {
 });
 
 $(document).on("click", "#modal-renren .oauth", function() {
-	window.open("https://graph.renren.com/oauth/authorize?client_id="+renrenApiKey+"&redirect_uri="+renrenRedirectUri+"&response_type=code&scope=read_user_feed");
+	window.open("https://graph.renren.com/oauth/authorize?client_id="+renrenApiKey+"&redirect_uri="+renrenRedirectUri+"&response_type=code&scope=read_user_feed+read_user_status+read_user_share+read_user_album");
 });
 
 function getAllScreenNames(uid, screenNames, cursor) {

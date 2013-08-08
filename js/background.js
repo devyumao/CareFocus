@@ -34,14 +34,13 @@ if(localStorage.length === 0) {
 	localStorage.setItem("unreadStatuses", $.toJSON({}));
 } else {
 	var originNotif = parseInt((localStorage.getItem("notifAmount")));
-	if(originNotif === 0) {
-		chrome.browserAction.setBadgeText({text: ""});
-	} else {
+	if(originNotif > 0) {	
 		chrome.browserAction.setBadgeText({text: "" + originNotif});
+	} else {
+		chrome.browserAction.setBadgeText({text: ""});
 	}
 
 	var targets = $.evalJSON(localStorage.getItem("targets"));
-	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 
 	if (localStorage.getItem("renrenRefreshToken") !== null) {
 		renrenRefreshToken = localStorage.getItem("renrenRefreshToken");
@@ -67,23 +66,26 @@ if(localStorage.length === 0) {
 
 
 function checkAllStatusesUpdate() {
-	for (var key in targets) {
-		for (var social in targets[key]) {
-			if (social !== "mark") {	
-				var apiURL;
-				switch (social) {
-					case "weibo":
-						apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&trim_user=0";
-						break;
-					case "renren":
-						apiURL = "https://api.renren.com/v2/feed/list?access_token="+renrenAccessToken+"&userId="+targets[key][social]["id"];
-						break;
-					default:
-						break;
-				}
-				console.log(apiURL);
-				checkStatusesUpdate(key, apiURL, social)(); 
+	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
+
+	for (var key in checkPoint) {
+		for (var social in checkPoint[key]) {
+			var apiURL;
+			switch (social) {
+				case "weibo":
+					apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&trim_user=0";
+					break;
+				case "renren":
+					apiURL = "https://api.renren.com/v2/feed/list?access_token="+renrenAccessToken+"&userId="+targets[key][social]["id"];
+					break;
+				case "renrenSimple":
+					apiURL = "https://api.renren.com/v2/status/list?access_token="+renrenAccessToken+"&ownerId="+targets[key]["renren"]["id"];
+					break;
+				default:
+					break;
 			}
+			console.log(apiURL);
+			// checkStatusesUpdate(key, apiURL, social)(); 
 		}
 	}
 }
@@ -113,50 +115,59 @@ function checkStatusesUpdate(key, apiURL, social) {
 						statuses = data.response;
 						timestamp = "time";
 						break;
+					case "renrenSimple":
+						statuses = data.response;
+						timestamp = "createTime";
+						break;
 					default:
 						break;
 				}
 
+				var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 
 				if (checkPoint[key][social] !== "") {
-					var lastCheckPoint = new Date(checkPoint[key][social]);
+					// var lastCheckPoint = new Date(checkPoint[key][social]);
+					lastCheckPoint = new Date("2013-2-23 23:25:58");
 
 					for (var i = 0; i < statuses.length; i++) {
 						var status = statuses[i];
-						var createdAt = new Date(status[timestamp]);
-						if (createdAt > lastCheckPoint) {
-							if(0 === i) {
-								checkPoint[key][social] = status[timestamp];
-								localStorage.setItem("checkPoint", $.toJSON(checkPoint));	
+
+						if ( (social !== "renren") || ((social === "renren") && (status.type !== "UPDATE_STATUS")) ) {
+							var createdAt = new Date(status[timestamp]);
+							if (createdAt > lastCheckPoint) {
+								if(0 === i) {
+									checkPoint[key][social] = status[timestamp];
+									localStorage.setItem("checkPoint", $.toJSON(checkPoint));	
+								}
+								unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
+								unreadStatuses[key][social+"-"+status.id] = {
+									"type": social, 
+									"timestamp": status[timestamp], 
+									"data": status
+								};
+								localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+
+								notifAmount = parseInt((localStorage.getItem("notifAmount")));
+								localStorage.setItem("notifAmount", ++notifAmount);
+
+							} else {
+								break;
 							}
-							unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
-							unreadStatuses[key][social+"-"+status.id] = {
-								"type": social, 
-								"timestamp": status[timestamp], 
-								"data": status
-							};
-							localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
-
-							notifAmount = parseInt((localStorage.getItem("notifAmount")));
-							localStorage.setItem("notifAmount", ++notifAmount);
-
-						} else {
-							break;
 						}
 					}
 				} else if (typeof statuses[0] !== "undefined") {
 					checkPoint[key][social] = statuses[0][timestamp];
 					localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 				} else {
-					checkPoint[key][social] = new Date(); // set a date avant
+					checkPoint[key][social] = new Date("2008-3-2 20:00:00");
 					localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 				}
 
 				notifAmount = parseInt((localStorage.getItem("notifAmount")));
-				if(notifAmount === 0) {
-					chrome.browserAction.setBadgeText({text: ""});
-				} else {
+				if(notifAmount > 0) {
 					chrome.browserAction.setBadgeText({text: "" + notifAmount});
+				} else {
+					chrome.browserAction.setBadgeText({text: ""});
 				}	
 			},
 			error: function(data) {

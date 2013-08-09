@@ -87,3 +87,14 @@ body {
 .item-title {
 	margin-bottom: 5px;
 }
+
+.nav .glyphicon {
+	font-size: 16px;
+	color: white;
+	float: right;
+	font-weight: bold;
+	position: relative;
+	top: 12px;
+	margin-right: 13px;
+	opacity: 0.7;
+}

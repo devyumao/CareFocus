@@ -200,13 +200,18 @@ $(document).ready(function() {
 			isFirstKey = false;
 		}
 
+		$navTabs.append(
+			'<span title="设置" class="glyphicon glyphicon-cog"></span>'
+			+ '<span title="刷新" class="glyphicon glyphicon-refresh"></span>'
+			+ '<span title="清空当前对象的消息" class="glyphicon glyphicon-trash"></span>'
+		);
 	} else {
 
 	}
 });
 
 
-/*$(document).on("click", ".item-wrapper .close, .item-wrapper .item-more", function(e) {
+$(document).on("click", ".item-wrapper .close, .item-wrapper .item-more", function() {
 	$wrapper = $(this).parents(".item-wrapper");
 	var sid = $wrapper.attr("id");
 	var key = $wrapper.parents(".tab-pane").attr("id").substr(1);
@@ -224,7 +229,40 @@ $(document).ready(function() {
 	var notifAmount = parseInt((localStorage.getItem("notifAmount")));
 	localStorage.setItem("notifAmount", --notifAmount);
 	chrome.browserAction.setBadgeText({text: (notifAmount > 0) ? ""+notifAmount : ""});
-});*/
+});
+
+$(document).on("click", ".nav .glyphicon-refresh", function() {
+	window.location.reload();
+});
+
+$(document).on("click", ".nav .glyphicon-trash", function() {
+	$(".tab-content .active .item-wrapper").remove();
+
+	var key = $(".tab-content .active").attr("id").substr(1);
+	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
+	unreadStatuses[key] = {};
+	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+
+	var notifAmount = parseInt(localStorage.getItem("notifAmount") - getCountFromeObject(unreadStatuses[key]));
+	localStorage.setItem("notifAmount", notifAmount);
+	chrome.browserAction.setBadgeText({text: (notifAmount > 0) ? "" + notifAmount : ""});
+
+	$("[href=#t"+key+"]").find(".badge").text("");
+});
+
+$(document).on("click", ".nav .glyphicon-cog", function() {
+	chrome.tabs.create({url: "options.html"});
+});
+
+$(document).on({
+	mouseenter: function() {
+		$(this).css("opacity", "1").css("cursor", "pointer");
+
+	},
+	mouseleave: function() {
+		$(this).css("opacity", "0.7").css("cursor", "auto");
+	}
+}, ".nav .glyphicon");
 
 
 function sortTime(a, b) {

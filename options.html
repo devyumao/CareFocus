@@ -10,11 +10,11 @@
 <body>
 	<div class="container">
 		<div class="row row-header">
-			<div class="col-2"><h2>设 置</h2></div>
+			<div class="col-2"><h2>设&nbsp;&nbsp;置</h2></div>
 		</div>
 		<div class="row row-settings">
 			<div class="col-2">
-				<a href="#modal-add-target" id="btn-add" class="btn btn-default" data-toggle="modal">添加新的关注对象</a>
+				<a href="#modal-add-target" id="btn-add" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-plus-sign"></span>添加关注对象</a>
 			</div>
 			<div class="col-2"></div>
 			<div class="col-2">
@@ -71,7 +71,7 @@
 		  			<h3>添加关注对象</h3>
 				</div>
 				<div class="modal-body">
-					<input type="text" placeholder="设置备注名" /> 如：女神，老婆，基友……
+					<input type="text" placeholder="设置备注名" /> 如：女神，基友 ……
 				</div>
 				<div class="modal-footer">
 		  			<button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
@@ -90,13 +90,14 @@
 				</div>
 				<div class="modal-body">
 					<div class="alert">您未登录新浪微博。请单击<a href="http://weibo.com/" target="_blank" class="alert-link">此处</a>登录。</div>
-					<input type="text" class="friend-inputor" placeholder="输入ta的帐号名" autocomplete="off" />
+					<input type="text" class="friend-inputor" placeholder="输入好友帐号名" autocomplete="off" />
 			  		<div class="selected-friend">
 			  			<img class="selected-friend-avatar" src="" />
 			  			<div class="selected-friend-name"><a target="_blank"></a></div>
 			  		</div>
 				</div>
 				<div class="modal-footer">
+					<button class="btn btn-danger btn-delete">删除</button>
 		  			<button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
 		  			<button class="btn btn-primary confirm">确认</button>
 				</div>
@@ -115,7 +116,7 @@
 					<div>
 						<a class="oauth">授权</a>
 					</div>
-					<input type="text" class="friend-inputor" placeholder="输入ta的帐号名" autocomplete="off" />
+					<input type="text" class="friend-inputor" placeholder="输入好友帐号名" autocomplete="off" />
 			  		<div class="selected-friend">
 			  			<img class="selected-friend-avatar" src="" />
 			  			<div class="selected-friend-name"></div>

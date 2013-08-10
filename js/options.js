@@ -59,7 +59,7 @@ $(document).ready(function() {
 		for (var j = 0; j < socialNetworks.length; j++) {
 			var social = socialNetworks[j];
 			if (typeof targets[key][social] !== "undefined") {
-				$(".btn-"+social+" img").css("-webkit-filter", "grayscale(0%)");
+				$wrapper.find(".btn-"+social+" img").css("-webkit-filter", "grayscale(0%)");
 			}
 		}
 
@@ -223,12 +223,26 @@ $(document).on("click", ".btn-weibo", function() {
 	var $friendInputor = $modalWeibo.find(".friend-inputor");
 	var $friendAvatar = $modalWeibo.find(".selected-friend-avatar");
 	var $friendName = $modalWeibo.find(".selected-friend-name a");
+
 	$modalWeibo.find(".alert").hide();
-	$friendInputor.val("");
-	$friendAvatar.attr("src", "");
-	$friendName.text("");
-	$friendName.attr("href", "");
+
 	$currTargetWrapper = $(this).parents(".target-wrapper");
+	var id = $currTargetWrapper.attr("id").substr(1);
+
+	if (typeof targets[id]["weibo"] !== "undefined") {
+		selectedTarget = targets[id]["weibo"];
+		$friendInputor.val(selectedTarget["name"]);
+		$friendAvatar.attr("src", selectedTarget["avatar"]);
+		$friendName.text(selectedTarget["name"]);
+		$friendName.attr("href", siteURL["weibo"] + "u/" + selectedTarget["id"]);
+		$modalWeibo.find(".btn-delete").show();
+	} else {
+		$friendInputor.val("");
+		$friendAvatar.attr("src", "");
+		$friendName.text("");
+		$friendName.attr("href", "");
+		$modalWeibo.find(".btn-delete").hide();
+	}
 	/* remember to set a condition "undefined" for data.uid */
 	$.ajax({
 		url: "https://api.weibo.com/2/account/get_uid.json?source="+weiboAppKey,
@@ -249,7 +263,11 @@ $(document).on("click", ".btn-weibo", function() {
 							$friendAvatar.attr("src", data.avatar_large);
 							$friendName.text(item);
 							$friendName.attr("href", siteURL["weibo"] + "u/" + data.id);
-							selectedTarget = data;
+							selectedTarget = {
+								"id": data.id,
+								"name": data.screen_name,
+								"avatar": data.avatar_large
+							};
 						},
 						error: function(data) {
 							alert("Show Ajax Error");
@@ -295,11 +313,7 @@ $(document).on("click", "#modal-weibo .confirm", function() {
 	var id = $currTargetWrapper.attr("id").substr(1);
 	/* information display condition */
 	if ($("#modal-weibo .selected-friend-name").text() !== "") {
-		targets[id]["weibo"] = {
-			"id": selectedTarget.id,
-			"name": selectedTarget.screen_name,
-			"avatar": selectedTarget.avatar_large
-		};
+		targets[id]["weibo"] = selectedTarget;
 		targets[id]["avatarType"] = "weibo";
 
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
@@ -317,15 +331,40 @@ $(document).on("click", "#modal-weibo .confirm", function() {
 	}
 });
 
-// WEIBO modal confirm
+$(document).on("click", "#modal-weibo .btn-delete", function() {
+	var id = $currTargetWrapper.attr("id").substr(1);
+	delete targets[id]["weibo"];
+	
+	if (typeof targets[id]["renren"] !== "undefined") {
+		targets[id]["avatarType"] = "renren";
+		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["renren"]["avatar"][2]["url"]);
+	} else {
+		targets[id]["avatarType"] = "";
+		$("#modal-weibo").modal("hide");
+	}
+
+	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
+	delete checkPoint[id]["weibo"];
+
+	localStorage.setItem("targets", $.toJSON(targets));
+	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
+	backgroundPage.location.reload();
+
+	$currTargetWrapper.find(".btn-weibo img").css("-webkit-filter", "grayscale(100%)");
+
+	$("#modal-weibo").modal("hide");
+});
+
+
+// RENREN modal confirm
 $(document).on("click", "#modal-renren .confirm", function() {
 	var id = $currTargetWrapper.attr("id").substr(1);
 	/* information display condition */
 	if ($("#modal-renren .selected-friend-name").text() !== "") {
 		targets[id]["renren"] = {
-			"id": selectedTarget.id,
-			"name": selectedTarget.name,
-			"avatar": selectedTarget.avatar
+			"id": selectedTarget["id"],
+			"name": selectedTarget["name"],
+			"avatar": selectedTarget["avatar"]
 		};
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 		checkPoint[id]["renren"] = "";
@@ -334,13 +373,15 @@ $(document).on("click", "#modal-renren .confirm", function() {
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();
 
-		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["renren"]["avatar_large"]);
+		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["renren"]["avatar"][2]["url"]);
 
 		$("#modal-renren").modal("hide");
 	} else {
 
 	}
 });
+
+
 
 $(document).on("click", ".alert-link", function() {
 	$(this).parents(".modal").modal('hide');

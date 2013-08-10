@@ -15,12 +15,14 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 			type: "GET",
 			dataType: "json",
 			success: function(data) {
+				sendResponse({data: "ok"});
 				localStorage.setItem("renrenAccessToken", data.access_token);
 				localStorage.setItem("renrenRefreshToken", data.refresh_token);
 				window.location.reload();
 			},
 			error: function(data) {
-				alert("RenrenOauthCode Ajax Error");
+				sendResponse({data: "ko"});
+				console.log("RenrenOauthCode Ajax Error");
 			}
 		});
 	}

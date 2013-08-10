@@ -14,7 +14,9 @@
 		</div>
 		<div class="row row-settings">
 			<div class="col-2">
-				<a href="#modal-add-target" id="btn-add" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-plus-sign"></span>添加关注对象</a>
+				<a href="#modal-add-target" id="btn-add" class="btn btn-default" data-toggle="modal">
+					<span class="glyphicon glyphicon-plus-sign"></span>添加关注对象
+				</a>
 			</div>
 			<div class="col-2"></div>
 			<div class="col-2">
@@ -24,7 +26,7 @@
 		<div class="row row-targets">
 		</div>
 		<div class="row row-footer">
-			<div class="col-2">开发: @YumaoYWJ</div>
+			<div class="col-2">开发：@YumaoYWJ</div>
 		</div>
 	</div>
 	<div id="modal-edit-target" class="modal fade in" >
@@ -89,10 +91,11 @@
 		  			<h3>选择ta的新浪微博帐号</h3>
 				</div>
 				<div class="modal-body">
-					<div class="alert">您未登录新浪微博。请单击<a href="http://weibo.com/" target="_blank" class="alert-link">此处</a>登录。</div>
+					<div class="alert alert-warning">您尚未登录新浪微博，请单击<a href="http://weibo.com/" target="_blank" class="alert-link">此处</a>登录。（建议勾选“下次自动登录”）</div>
+					<!-- <div class="alert alert-info">当前登录帐号为&nbsp;<span></span>&nbsp;。如果不是您的，请单击<a href="http://weibo.com/" target="_blank" class="alert-link">此处</a>更改。</div> -->
 					<input type="text" class="friend-inputor" placeholder="输入好友帐号名" autocomplete="off" />
 			  		<div class="selected-friend">
-			  			<img class="selected-friend-avatar" src="" />
+			  			<img class="selected-friend-avatar img-rounded" src="" />
 			  			<div class="selected-friend-name"><a target="_blank"></a></div>
 			  		</div>
 				</div>
@@ -113,16 +116,15 @@
 		  			<h3>选择ta的人人帐号</h3>
 				</div>
 				<div class="modal-body">
-					<div>
-						<a class="oauth">授权</a>
-					</div>
+					<div class="alert alert-warning">您的人人帐号尚未授权，请单击<a target="_blank" class="alert-link">此处</a>。</div>
 					<input type="text" class="friend-inputor" placeholder="输入好友帐号名" autocomplete="off" />
 			  		<div class="selected-friend">
-			  			<img class="selected-friend-avatar" src="" />
-			  			<div class="selected-friend-name"></div>
+			  			<img class="selected-friend-avatar img-rounded" src="" />
+			  			<div class="selected-friend-name"><a target="_blank"></a></div>
 			  		</div>
 				</div>
 				<div class="modal-footer">
+					<button class="btn btn-danger btn-delete">删除</button>
 		  			<button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
 		  			<button class="btn btn-primary confirm">确认</button>
 				</div>

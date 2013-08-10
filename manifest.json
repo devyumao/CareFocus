@@ -15,8 +15,7 @@
   "content_scripts": [
     {
       "matches": ["http://graph.renren.com/oauth/login_success.html?code=*"],
-      "css": ["css/content.css"],
-      "js": ["js/content.js"]
+      "js": ["js/jquery.js", "js/content.js"]
     }
   ],
   "permissions": [

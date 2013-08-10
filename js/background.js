@@ -70,22 +70,26 @@ function checkAllStatusesUpdate() {
 
 	for (var key in checkPoint) {
 		for (var social in checkPoint[key]) {
-			var apiURL;
+			var apiURL,
+				timeout;
 			switch (social) {
 				case "weibo":
 					apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&trim_user=0";
+					timeout = 0;
 					break;
 				case "renren":
 					apiURL = "https://api.renren.com/v2/feed/list?access_token="+renrenAccessToken+"&userId="+targets[key][social]["id"];
+					timeout = 1000;
 					break;
 				case "renrenSimple":
 					apiURL = "https://api.renren.com/v2/status/list?access_token="+renrenAccessToken+"&ownerId="+targets[key]["renren"]["id"];
+					timeout = 2000;
 					break;
 				default:
 					break;
 			}
 			console.log(apiURL);
-			// checkStatusesUpdate(key, apiURL, social)(); 
+			// setTimeout(checkStatusesUpdate(key, apiURL, social), timeout);
 		}
 	}
 }
@@ -175,7 +179,7 @@ function checkStatusesUpdate(key, apiURL, social) {
 			}
 		});
 
-		setTimeout(checkStatusesUpdate(key, apiURL, social), 30000);
+		// setTimeout(checkStatusesUpdate(key, apiURL, social), 90000);
 	};
 	
 }

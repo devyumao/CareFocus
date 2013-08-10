@@ -4,6 +4,11 @@ var renrenApiKey = "6c094cc7a9634012825a8fddd92dddec";
 var renrenRedirectUri = "http://graph.renren.com/oauth/login_success.html";
 var renrenAccessToken = (localStorage.getItem("renrenAccessToken") !== null) ? localStorage.getItem("renrenAccessToken") : "";
 
+var siteURL = {
+	"weibo": "http://weibo.com/",
+	"renren": "http://www.renren.com/"
+};
+
 var targets;
 if (localStorage.getItem("targets") !== null) {
 	targets = $.evalJSON(localStorage.getItem("targets"));	
@@ -15,19 +20,22 @@ var $currTargetWrapper,
 	currId,
 	selectedTarget;
 
-var targetHTML = '<div class="col-lg-2 target-wrapper">'
+var socialNetworks = ["weibo", "renren", "douban"];
+
+var targetHTML = '<div class="col-2 target-wrapper">'
 	+	'<div class="panel">'
 	+		'<div class="panel-heading">'
 	+			'<span class="target-mark"></span>'
 	+			'<span class="glyphicon glyphicon-remove-sign" href="#modal-remove-target" data-toggle="modal"></span>'
 	+			'<span class="glyphicon glyphicon-edit" href="#modal-edit-target" data-toggle="modal"></span>'
 	+		'</div>'
-	+		'<div>'
+	+		'<div class="target-avatar-block">'
 	+	  		'<img class="target-avatar" />'
 	+	  	'</div>'
-	+  		'<div class="target-social-btns btn-group">'
-	+  			'<a href="#modal-weibo" class="btn btn-default btn-weibo" data-toggle="modal">wb</a>'
-	+  			'<a href="#modal-renren" class="btn btn-default btn-renren" data-toggle="modal">rr</a>'
+	+  		'<div class="target-social-btns">'
+	+  			'<a href="#modal-weibo" class="btn-weibo" data-toggle="modal"><img src="img/weibo.png" /></a>'
+	+  			'<a href="#modal-renren" class="btn-renren" data-toggle="modal"><img src="img/renren.png" /></a>'
+	+			'<a href="#modal-douban" class="btn-douban" data-toggle="modal"><img src="img/douban.png" /></a>'
 	+  		'</div>'
 	+	'</div>'
 	+ '</div>';
@@ -43,11 +51,33 @@ $(document).ready(function() {
 		var key = originKeys[i];
 		$wrapper.attr("id", "t"+key);
 		$wrapper.find(".target-mark").text(targets[key]["mark"]);
-		if (typeof targets[key]["weibo"] !== "undefined") {
+		
+		if (targets[key]["avatarType"] === "weibo") {
 			$wrapper.find(".target-avatar").attr("src", targets[key]["weibo"]["avatar"]);
 		}
+
+		for (var j = 0; j < socialNetworks.length; j++) {
+			var social = socialNetworks[j];
+			if (typeof targets[key][social] !== "undefined") {
+				$(".btn-"+social+" img").css("-webkit-filter", "grayscale(0%)");
+			}
+		}
+
+
 	}
 });
+
+
+// glyphicons hover
+$(document).on({
+	mouseenter: function() {
+		$(this).css("opacity", "0.8");
+	},
+	mouseleave: function() {
+		$(this).css("opacity", "0.5");
+	}
+}, ".panel-heading .glyphicon");
+
 
 // panel hover
 $(document).on({
@@ -63,7 +93,7 @@ $(document).on({
 $(document).on("click", ".panel-heading .glyphicon-remove-sign", function() {
 	$currTargetWrapper = $(this).parents(".target-wrapper");
 	currId = $currTargetWrapper.attr("id").substr(1); 
-	$("#modal-remove-target .modal-body span").text(targets[currId]["mark"]);
+	$("#modal-remove-target .modal-body span").text(" "+targets[currId]["mark"]+" ");
 });
 
 // REMOVE modal confirm
@@ -102,13 +132,23 @@ $(document).on("click", ".panel-heading .glyphicon-edit", function() {
 	$("#modal-edit-target .modal-body input").val(targets[currId]["mark"]);
 });
 
-// EDIT modal shown
-$(document).on("shown.bs.modal", "#modal-edit-target", function() {
-	$("#modal-edit-target .modal-body input").focus();
+// EDIT and ADD modal shown
+$(document).on("shown.bs.modal", "#modal-edit-target, #modal-add-target", function() {
+	$(this).find(".modal-body input").focus();
 });
 
 // EDIT modal confirm
 $(document).on("click", "#modal-edit-target .confirm", function() {
+	confirmEditTarget();
+});
+
+$(document).on("keypress", "#modal-edit-target .modal-body input", function(e) {
+	if (e.keyCode === 13) {
+		confirmEditTarget();
+	}
+});
+
+function confirmEditTarget() {
 	var inputVal = $.trim($("#modal-edit-target input").val());
 	if (inputVal === "") {
 
@@ -123,7 +163,7 @@ $(document).on("click", "#modal-edit-target .confirm", function() {
 
 		$('#modal-edit-target').modal('hide');
 	}
-});
+}
 
 // ADD button click
 $(document).on("click", "#btn-add", function() {
@@ -132,6 +172,16 @@ $(document).on("click", "#btn-add", function() {
 
 // ADD modal confirm
 $(document).on("click", "#modal-add-target .confirm", function() {
+	confirmAddTarget();
+});
+
+$(document).on("keypress", "#modal-add-target .modal-body input", function(e) {
+	if (e.keyCode === 13) {
+		confirmAddTarget();
+	}
+});
+
+function confirmAddTarget() {
 	var inputVal = $.trim($("#modal-add-target input").val());
 	if (inputVal === "") {
 
@@ -145,7 +195,10 @@ $(document).on("click", "#modal-add-target .confirm", function() {
 		} else {
 			id = 1;
 		}	
-		targets[id] = { "mark": inputVal };
+		targets[id] = { 
+			"mark": inputVal,
+			"avatarType": "" 
+		};
 		var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
 		unreadStatuses[id] = {};
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
@@ -162,17 +215,19 @@ $(document).on("click", "#modal-add-target .confirm", function() {
 
 		$('#modal-add-target').modal('hide');
 	}
-});
+}
 
 // WEIBO button click
 $(document).on("click", ".btn-weibo", function() {
 	var $modalWeibo = $("#modal-weibo");
 	var $friendInputor = $modalWeibo.find(".friend-inputor");
 	var $friendAvatar = $modalWeibo.find(".selected-friend-avatar");
-	var $friendName = $modalWeibo.find(".selected-friend-name");
+	var $friendName = $modalWeibo.find(".selected-friend-name a");
+	$modalWeibo.find(".alert").hide();
 	$friendInputor.val("");
 	$friendAvatar.attr("src", "");
 	$friendName.text("");
+	$friendName.attr("href", "");
 	$currTargetWrapper = $(this).parents(".target-wrapper");
 	/* remember to set a condition "undefined" for data.uid */
 	$.ajax({
@@ -193,6 +248,7 @@ $(document).on("click", ".btn-weibo", function() {
 						success: function(data) {
 							$friendAvatar.attr("src", data.avatar_large);
 							$friendName.text(item);
+							$friendName.attr("href", siteURL["weibo"] + "u/" + data.id);
 							selectedTarget = data;
 						},
 						error: function(data) {
@@ -203,8 +259,8 @@ $(document).on("click", ".btn-weibo", function() {
 				}
 			});
 		},
-		error: function(data) {
-			alert("GetUid Ajax Error");
+		error: function() {
+			$modalWeibo.find(".alert").show();
 		}
 	});
 });
@@ -244,6 +300,8 @@ $(document).on("click", "#modal-weibo .confirm", function() {
 			"name": selectedTarget.screen_name,
 			"avatar": selectedTarget.avatar_large
 		};
+		targets[id]["avatarType"] = "weibo";
+
 		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 		checkPoint[id]["weibo"] = "";
 		localStorage.setItem("targets", $.toJSON(targets));
@@ -251,6 +309,7 @@ $(document).on("click", "#modal-weibo .confirm", function() {
 		backgroundPage.location.reload();
 
 		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["weibo"]["avatar"]);
+		$currTargetWrapper.find(".btn-weibo img").css("-webkit-filter", "grayscale(0%)");
 
 		$("#modal-weibo").modal("hide");
 	} else {
@@ -283,6 +342,10 @@ $(document).on("click", "#modal-renren .confirm", function() {
 	}
 });
 
+$(document).on("click", ".alert-link", function() {
+	$(this).parents(".modal").modal('hide');
+});
+
 $(document).on("click", "#modal-renren .oauth", function() {
 	window.open("https://graph.renren.com/oauth/authorize?client_id="+renrenApiKey+"&redirect_uri="+renrenRedirectUri+"&response_type=code&scope=read_user_feed+read_user_status+read_user_share+read_user_album");
 });
@@ -295,6 +358,7 @@ function getAllScreenNames(uid, screenNames, cursor) {
 		success: function(data) {
 			var len = data.users.length;
 			if (0 === len) { 
+				$("#modal-weibo .modal-body input").focus();
 			} else {
 				for (var i = 0; i < len; i++) {
 					var user = data.users[i];
@@ -344,6 +408,7 @@ function getRenrenFriends(uid, friends, pageNum) {
 					    return name;
 					}
 				});
+				$("#modal-renren .modal-body input").focus();
 			} else {
 				getRenrenFriends(uid, friends.concat(data.response), pageNum + 1);
 			}

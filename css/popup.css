@@ -1,4 +1,4 @@
-html, body{
+html {
 	width: 500px;
 	height: 600px;
 	overflow-y: auto;
@@ -9,17 +9,30 @@ body {
 	padding-top: 38px;
 }
 
+.tabbable {
+	
+}
+
 .nav .tab-name {
 	font-weight: bold;
-	font-size: 15px;
+	font-size: 14px;
 }
 
 .nav .badge {
-	background-color: #d9534f;
+	background-color: #428bca;
 	position: absolute;
 	z-index: 100;
 	top: 2px;
 	right: 0px;
+}
+
+
+.nav-tabs>li.active>a, .nav-tabs>li>a:hover, .nav-tabs>li>a:focus {
+	color: #555;
+}
+
+.nav-tabs>li>a {
+	color: #bcbcbc;
 }
 
 .tab-content {
@@ -52,14 +65,15 @@ body {
 }
 
 .well {
-	background-color: white; 
+	background-color: white;
 	margin-top: 5px;
 	margin-bottom: 10px;
 	padding: 10px 12px 8px 12px;
 }
 
-.item-retweeted .well {
+.item-retweeted {
 	margin-bottom: 3px;
+	background-color: #fafafa;
 } 
 
 .close {
@@ -97,4 +111,5 @@ body {
 	top: 12px;
 	margin-right: 13px;
 	opacity: 0.7;
+	cursor: pointer;
 }

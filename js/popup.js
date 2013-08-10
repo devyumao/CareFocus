@@ -231,36 +231,40 @@ $(document).on("click", ".item-wrapper .close, .item-wrapper .item-more", functi
 	chrome.browserAction.setBadgeText({text: (notifAmount > 0) ? ""+notifAmount : ""});
 });
 
+
 $(document).on("click", ".nav .glyphicon-refresh", function() {
 	window.location.reload();
 });
+
 
 $(document).on("click", ".nav .glyphicon-trash", function() {
 	$(".tab-content .active .item-wrapper").remove();
 
 	var key = $(".tab-content .active").attr("id").substr(1);
 	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
-	unreadStatuses[key] = {};
-	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
 
 	var notifAmount = parseInt(localStorage.getItem("notifAmount") - getCountFromeObject(unreadStatuses[key]));
 	localStorage.setItem("notifAmount", notifAmount);
-	chrome.browserAction.setBadgeText({text: (notifAmount > 0) ? "" + notifAmount : ""});
+	chrome.browserAction.setBadgeText({text: (notifAmount > 0) ? ""+notifAmount : ""});
+
+	unreadStatuses[key] = {};
+	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
 
 	$("[href=#t"+key+"]").find(".badge").text("");
 });
+
 
 $(document).on("click", ".nav .glyphicon-cog", function() {
 	chrome.tabs.create({url: "options.html"});
 });
 
+
 $(document).on({
 	mouseenter: function() {
-		$(this).css("opacity", "1").css("cursor", "pointer");
-
+		$(this).css("opacity", "1");
 	},
 	mouseleave: function() {
-		$(this).css("opacity", "0.7").css("cursor", "auto");
+		$(this).css("opacity", "0.7");
 	}
 }, ".nav .glyphicon");
 
@@ -268,6 +272,7 @@ $(document).on({
 function sortTime(a, b) {
 	return new Date(b.time) - new Date(a.time);
 }
+
 
 function getSortedKeysByTime(statuses) {
 	var arr = [];

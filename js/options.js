@@ -4,9 +4,15 @@ var renrenApiKey = "6c094cc7a9634012825a8fddd92dddec";
 var renrenRedirectUri = "http://graph.renren.com/oauth/login_success.html";
 var renrenAccessToken = (localStorage.getItem("renrenAccessToken") !== null) ? localStorage.getItem("renrenAccessToken") : "";
 
+var doubanApiKey = "013a12dea106488403ae389be312d98c";
+var doubanRedirectUri = "http://yuzhang-lille.farbox.com";
+var doubanAccessToken = (localStorage.getItem("doubanAccessToken") !== null) ? localStorage.getItem("doubanAccessToken") : "";
+var doubanUserId;
+
 var siteURL = {
 	"weibo": "http://weibo.com/",
-	"renren": "http://www.renren.com/"
+	"renren": "http://www.renren.com/",
+	"douban": "http://www.douban.com/"
 };
 
 var targets;
@@ -30,12 +36,12 @@ var targetHTML = '<div class="col-2 target-wrapper">'
 	+			'<span title="修改备注名" class="glyphicon glyphicon-edit" href="#modal-edit-target" data-toggle="modal"></span>'
 	+		'</div>'
 	+		'<div class="target-avatar-block">'
-	+	  		'<img class="target-avatar img-rounded" />'
+	+	  		'<div class="target-avatar"></div>'
 	+	  	'</div>'
 	+  		'<div class="target-social-btns">'
-	+  			'<a href="#modal-weibo" class="btn-weibo" data-toggle="modal"><img title="微博" src="img/weibo.png" /></a>'
-	+  			'<a href="#modal-renren" class="btn-renren" data-toggle="modal"><img title="人人" src="img/renren.png" /></a>'
-	+			'<a href="#modal-douban" class="btn-douban" data-toggle="modal"><img title="豆瓣" src="img/douban.png" /></a>'
+	+  			'<a href="#modal-weibo" class="btn-weibo" data-toggle="modal" title="微博"></a>'
+	+  			'<a href="#modal-renren" class="btn-renren" data-toggle="modal" title="人人"></a>'
+	+			'<a href="#modal-douban" class="btn-douban" data-toggle="modal" title="豆瓣"></a>'
 	+  		'</div>'
 	+	'</div>'
 	+ '</div>';
@@ -54,15 +60,17 @@ $(document).ready(function() {
 		$wrapper.find(".target-mark").text(targets[key]["mark"]);
 		
 		if (targets[key]["avatarType"] === "weibo") {
-			$wrapper.find(".target-avatar").attr("src", targets[key]["weibo"]["avatar"]);
+			$wrapper.find(".target-avatar").css("background-image", "url("+targets[key]["weibo"]["avatar"]+")");
 		} else if (targets[key]["avatarType"] === "renren") {
-			$wrapper.find(".target-avatar").attr("src", targets[key]["renren"]["avatar"][2]["url"]);
+			$wrapper.find(".target-avatar").css("background-image", "url("+targets[key]["renren"]["avatar"][2]["url"]+")");
+		} else if (targets[key]["avatarType"] === "douban") {
+			$wrapper.find(".target-avatar").css("background-image", "url("+targets[key]["douban"]["avatar"]+")");
 		}
 
 		for (var j = 0; j < socialNetworks.length; j++) {
 			var social = socialNetworks[j];
 			if (typeof targets[key][social] !== "undefined") {
-				$wrapper.find(".btn-"+social+" img").css("-webkit-filter", "grayscale(0%)");
+				$wrapper.find(".btn-"+social).css("background-image", "url(/img/social-icons.png)");
 			}
 		}
 	}
@@ -239,13 +247,13 @@ $(document).on("click", ".btn-weibo", function() {
 	if (typeof targets[id]["weibo"] !== "undefined") {
 		selectedTarget = targets[id]["weibo"];
 		$friendInputor.val(selectedTarget["name"]);
-		$friendAvatar.attr("src", selectedTarget["avatar"]);
+		$friendAvatar.css("background-image", "url("+selectedTarget["avatar"]+")");
 		$friendName.text(selectedTarget["name"]);
 		$friendName.attr("href", siteURL["weibo"] + "u/" + selectedTarget["id"]);
 		$modalWeibo.find(".btn-delete").show();
 	} else {
 		$friendInputor.val("");
-		$friendAvatar.attr("src", "");
+		$friendAvatar.css("background-image", "");
 		$friendName.text("");
 		$friendName.attr("href", "");
 		$modalWeibo.find(".btn-delete").hide();
@@ -267,7 +275,7 @@ $(document).on("click", ".btn-weibo", function() {
 						type: "GET",
 						dataType: "json",
 						success: function(data) {
-							$friendAvatar.attr("src", data.avatar_large);
+							$friendAvatar.css("background-image", "url("+data.avatar_large+")");
 							$friendName.text(item);
 							$friendName.attr("href", siteURL["weibo"] + "u/" + data.id);
 							selectedTarget = {
@@ -302,12 +310,12 @@ $(document).on("click", ".btn-renren", function() {
 	if (typeof targets[id]["renren"] !== "undefined") {
 		selectedTarget = targets[id]["renren"];
 		$modalRenren.find(".friend-inputor").val(selectedTarget["name"]);
-		$modalRenren.find(".selected-friend-avatar").attr("src", selectedTarget.avatar[2].url);
+		$modalRenren.find(".selected-friend-avatar").css("background-image", "url("+selectedTarget.avatar[2].url+")");
 		$modalRenren.find(".selected-friend-name a").text(selectedTarget["name"]).attr("href", siteURL["renren"]+selectedTarget["id"]);
 		$modalRenren.find(".btn-delete").show();
 	} else {
 		$modalRenren.find(".friend-inputor").val("");
-		$modalRenren.find(".selected-friend-avatar").attr("src", "");
+		$modalRenren.find(".selected-friend-avatar").css("background-image", "");
 		$modalRenren.find(".selected-friend-name a").text(name).attr("href", "");
 		$modalRenren.find(".btn-delete").hide();
 	}
@@ -330,6 +338,38 @@ $(document).on("click", ".btn-renren", function() {
 });
 
 
+// DOUBAN button click
+$(document).on("click", ".btn-douban", function() {
+	var $modalDouban = $("#modal-douban");
+
+	$modalDouban.find(".alert-warning").hide();
+
+	$currTargetWrapper = $(this).parents(".target-wrapper");
+	var id = $currTargetWrapper.attr("id").substr(1);
+
+	if (typeof targets[id]["douban"] !== "undefined") {
+		selectedTarget = targets[id]["douban"];
+		$modalDouban.find(".friend-inputor").val(selectedTarget["name"]);
+		$modalDouban.find(".selected-friend-avatar").css("background-image", "url("+selectedTarget["avatar"]+")");
+		$modalDouban.find(".selected-friend-name a").text(selectedTarget["name"]).attr("href", siteURL["douban"]+"people/"+selectedTarget["id"]);
+		$modalDouban.find(".btn-delete").show();
+	} else {
+		$modalDouban.find(".friend-inputor").val("");
+		$modalDouban.find(".selected-friend-avatar").css("background-image", "");
+		$modalDouban.find(".selected-friend-name a").text(name).attr("href", "");
+		$modalDouban.find(".btn-delete").hide();
+	}
+
+	doubanUserId = localStorage.getItem("doubanUserId");
+	if (doubanUserId !== null) {
+		var friends = [];
+		getDoubanFriends(doubanUserId, friends, 0);
+	} else {
+		$modalDouban.find(".alert-warning").show();
+	}
+});
+
+
 // WEIBO modal confirm
 $(document).on("click", "#modal-weibo .confirm", function() {
 	var id = $currTargetWrapper.attr("id").substr(1);
@@ -344,8 +384,8 @@ $(document).on("click", "#modal-weibo .confirm", function() {
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();
 
-		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["weibo"]["avatar"]);
-		$currTargetWrapper.find(".btn-weibo img").css("-webkit-filter", "grayscale(0%)");
+		$currTargetWrapper.find(".target-avatar").css("background-image", "url("+targets[id]["weibo"]["avatar"]+")");
+		$currTargetWrapper.find(".btn-weibo").css("background-image", "url(/img/social-icons.png)");
 
 		$("#modal-weibo").modal("hide");
 	} else {
@@ -369,10 +409,33 @@ $(document).on("click", "#modal-renren .confirm", function() {
 		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 		backgroundPage.location.reload();
 
-		$currTargetWrapper.find(".target-avatar").attr("src", targets[id]["renren"]["avatar"][2]["url"]);
-		$currTargetWrapper.find(".btn-renren img").css("-webkit-filter", "grayscale(0%)");
+		$currTargetWrapper.find(".target-avatar").css("background-image", "url("+targets[id]["renren"]["avatar"][2]["url"]+")");
+		$currTargetWrapper.find(".btn-renren").css("background-image", "url(/img/social-icons.png)");
 
 		$("#modal-renren").modal("hide");
+	} else {
+
+	}
+});
+
+// DOUBAN modal confirm
+$(document).on("click", "#modal-douban .confirm", function() {
+	var id = $currTargetWrapper.attr("id").substr(1);
+	/* information display condition */
+	if ($("#modal-douban .selected-friend-name a").text() !== "") {
+		targets[id]["douban"] = selectedTarget;
+		targets[id]["avatarType"] = "douban"; 
+
+		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
+		checkPoint[id]["douban"] = "";
+		localStorage.setItem("targets", $.toJSON(targets));
+		localStorage.setItem("checkPoint", $.toJSON(checkPoint));
+		backgroundPage.location.reload();
+
+		$currTargetWrapper.find(".target-avatar").css("background-image", "url("+targets[id]["douban"]["avatar"]+")");
+		$currTargetWrapper.find(".btn-douban").css("background-image", "url(/img/social-icons.png)");
+
+		$("#modal-douban").modal("hide");
 	} else {
 
 	}
@@ -386,6 +449,9 @@ $(document).on("click", "#modal-weibo .btn-delete", function() {
 	if (typeof targets[id]["renren"] !== "undefined") {
 		targets[id]["avatarType"] = "renren";
 		avatarURL = targets[id]["renren"]["avatar"][2]["url"];
+	} else if (typeof targets[id]["douban"] !== "undefined") {
+		targets[id]["avatarType"] = "douban";
+		avatarURL = targets[id]["douban"]["avatar"];
 	} else {
 		targets[id]["avatarType"] = "";
 		avatarURL = "img/img-null.png";
@@ -398,8 +464,8 @@ $(document).on("click", "#modal-weibo .btn-delete", function() {
 	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 	backgroundPage.location.reload();
 
-	$currTargetWrapper.find(".btn-weibo img").css("-webkit-filter", "grayscale(100%)");
-	$currTargetWrapper.find(".target-avatar").attr("src", avatarURL);
+	$currTargetWrapper.find(".btn-weibo").css("background-image", "url(/img/social-icons-bw.png)");
+	$currTargetWrapper.find(".target-avatar").css("background-image", "url("+avatarURL+")");
 
 	$("#modal-weibo").modal("hide");
 });
@@ -413,6 +479,9 @@ $(document).on("click", "#modal-renren .btn-delete", function() {
 	if (typeof targets[id]["weibo"] !== "undefined") {
 		targets[id]["avatarType"] = "weibo";
 		avatarURL = targets[id]["weibo"]["avatar"];
+	} else if (typeof targets[id]["douban"] !== "undefined") {
+		targets[id]["avatarType"] = "douban";
+		avatarURL = targets[id]["douban"]["avatar"];
 	} else {
 		targets[id]["avatarType"] = "";
 		avatarURL = "img/img-null.png";
@@ -420,17 +489,47 @@ $(document).on("click", "#modal-renren .btn-delete", function() {
 
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 	delete checkPoint[id]["renren"];
+	delete checkPoint[id]["renrenSimple"];
 
 	localStorage.setItem("targets", $.toJSON(targets));
 	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 	backgroundPage.location.reload();
 
-	$currTargetWrapper.find(".btn-renren img").css("-webkit-filter", "grayscale(100%)");
-	$currTargetWrapper.find(".target-avatar").attr("src", avatarURL);
+	$currTargetWrapper.find(".btn-renren").css("background-image", "url(/img/social-icons-bw.png)");
+	$currTargetWrapper.find(".target-avatar").css("background-image", "url("+avatarURL+")");
 
 	$("#modal-renren").modal("hide");
 });
 
+
+$(document).on("click", "#modal-douban .btn-delete", function() {
+	var id = $currTargetWrapper.attr("id").substr(1);
+	delete targets[id]["douban"];
+	
+	var avatarURL;
+	if (typeof targets[id]["weibo"] !== "undefined") {
+		targets[id]["avatarType"] = "weibo";
+		avatarURL = targets[id]["weibo"]["avatar"];
+	} else if (typeof targets[id]["renren"] !== "undefined") {
+		targets[id]["avatarType"] = "renren";
+		avatarURL = targets[id]["renren"]["avatar"][2]["url"];
+	} else {
+		targets[id]["avatarType"] = "";
+		avatarURL = "img/img-null.png";
+	}
+
+	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
+	delete checkPoint[id]["douban"];
+
+	localStorage.setItem("targets", $.toJSON(targets));
+	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
+	backgroundPage.location.reload();
+
+	$currTargetWrapper.find(".btn-douban").css("background-image", "url(/img/social-icons-bw.png)");
+	$currTargetWrapper.find(".target-avatar").css("background-image", "url("+avatarURL+")");
+
+	$("#modal-douban").modal("hide");
+});
 
 
 $(document).on("click", ".alert-link", function() {
@@ -438,10 +537,15 @@ $(document).on("click", ".alert-link", function() {
 });
 
 
-$(document).on("click", "#modal-renren .alert-warning .alert-link", function() {
+$(document).on("click", "#modal-renren .alert-link", function() {
 	window.open("https://graph.renren.com/oauth/authorize?client_id="+renrenApiKey+"&redirect_uri="+renrenRedirectUri+"&response_type=code&scope=read_user_feed+read_user_status+read_user_share+read_user_album");
-	$("#modal-renren").modal("hide");
 });
+
+
+$(document).on("click", "#modal-douban .alert-link", function() {
+	window.open("https://www.douban.com/service/auth2/auth?client_id="+doubanApiKey+"&redirect_uri="+doubanRedirectUri+"&response_type=code");
+});
+
 
 function getAllScreenNames(uid, screenNames, cursor) {
 	$.ajax({
@@ -476,17 +580,34 @@ function getRenrenFriends(uid, friends, pageNum) {
 				var names, map;
 				var $modalRenren = $("#modal-renren");
 
-				$("#modal-renren .friend-inputor").typeahead({
+				$modalRenren.find(".friend-inputor").typeahead({
 					source: function(query, process) {
 					    names = [];
 					    map = {};
 
 					    $.each(friends, function (i, friend) {
-					        map[friend.id] = friend;
+					        map[friend.id] = {
+					        	"id": friend.id,
+					        	"name": friend.name,
+					        	"avatar": friend.avatar
+					        };
 					        names.push(friend.name+"\t<span>"+friend.id+"</span>");
 					    });
 
 					    process(names);
+					},
+
+					matcher: function(item) {
+						var name = item.split("\t")[0];
+					    if (name.toLowerCase().indexOf(this.query.trim().toLowerCase()) != -1) {
+					        return true;
+					    }
+					},
+
+					highlighter: function (item) {
+					    var regex = new RegExp( '(' + this.query + ')', 'gi' );
+					    var name = item.split("\t")[0];
+					    return name.replace( regex, "<strong>$1</strong>" );
 					},
 
 					updater: function(item) {
@@ -494,25 +615,87 @@ function getRenrenFriends(uid, friends, pageNum) {
 						var name = nameAndId[0];
 						var id = nameAndId[1].match(/[0-9]+/);
 
-						selectedTarget = {
-							"id": map[id]["id"],
-							"name": map[id]["name"],
-							"avatar": map[id]["avatar"]
-						};
+						selectedTarget = map[id];
 
-						$modalRenren.find(".selected-friend-avatar").attr("src", selectedTarget.avatar[2].url);
+						$modalRenren.find(".selected-friend-avatar").css("background-image", "url("+selectedTarget.avatar[2].url+")");
 						$modalRenren.find(".selected-friend-name a").text(name).attr("href", siteURL["renren"]+id);
 
 					    return name;
 					}
 				});
-				$("#modal-renren .modal-body input").focus();
+				$modalRenren.find(".modal-body input").focus();
 			} else {
 				getRenrenFriends(uid, friends.concat(data.response), pageNum + 1);
 			}
 		},
 		error: function(data) {
 			alert("FriendList Ajax Error");
+		}
+	});
+}
+
+function getDoubanFriends(uid, friends, start) {
+	$.ajax({
+		url: "https://api.douban.com/shuo/v2/users/"+uid+"/following?count=100&start="+start+"&apikey="+doubanApiKey,
+		type: "GET",
+		dataType: "json",
+		success: function(data) {
+			if (0 === data.length) {
+				var names, map;
+				var $modalDouban = $("#modal-douban");
+
+				$modalDouban.find(".friend-inputor").typeahead({
+					source: function(query, process) {
+					    names = [];
+					    map = {};
+
+					    $.each(friends, function (i, friend) {
+					    	if (friend.type === "user") {
+						    	map[friend.id] = {
+						        	"id": friend.id,
+						        	"name": friend.screen_name,
+						        	"avatar": friend.large_avatar
+						        };
+						        names.push(friend.screen_name+"\t<span>"+friend.id+"</span>");
+					    	}		        
+					    });
+
+					    process(names);
+					},
+
+					matcher: function(item) {
+						var name = item.split("\t")[0];
+					    if (name.toLowerCase().indexOf(this.query.trim().toLowerCase()) != -1) {
+					        return true;
+					    }
+					},
+
+					highlighter: function (item) {
+					    var regex = new RegExp( '(' + this.query + ')', 'gi' );
+					    var name = item.split("\t")[0];
+					    return name.replace( regex, "<strong>$1</strong>" );
+					},
+
+					updater: function(item) {
+						var nameAndId = item.split("\t");
+						var name = nameAndId[0];
+						var id = nameAndId[1].match(/[0-9]+/);
+
+						selectedTarget = map[id];
+
+						$modalDouban.find(".selected-friend-avatar").css("background-image", "url("+selectedTarget.avatar+")");
+						$modalDouban.find(".selected-friend-name a").text(name).attr("href", siteURL["douban"]+"people/"+id);
+
+					    return name;
+					}
+				});
+				$modalDouban.find(".modal-body input").focus();
+			} else {
+				getDoubanFriends(uid, friends.concat(data), start + 100);
+			}
+		},
+		error: function(data) {
+			alert("Shuo Ajax Error");
 		}
 	});
 }

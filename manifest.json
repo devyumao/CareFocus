@@ -16,6 +16,10 @@
     {
       "matches": ["http://graph.renren.com/oauth/login_success.html?code=*"],
       "js": ["js/jquery.js", "js/content.js"]
+    },
+    {
+      "matches": ["http://yuzhang-lille.farbox.com/?code=*"],
+      "js": ["js/jquery.js", "js/content-douban.js"]
     }
   ],
   "permissions": [

@@ -6,7 +6,11 @@ var renrenApiKey = "6c094cc7a9634012825a8fddd92dddec",
 	renrenRefreshToken,
 	renrenAccessToken;
 
-
+var doubanApiKey = "013a12dea106488403ae389be312d98c",
+	doubanSecretKey = "79a883f3a7a4b184",
+	doubanRedirectUri = "http://yuzhang-lille.farbox.com",
+	doubanRefreshToken,
+	doubanAccessToken;
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 	if (request.key === "renrenCode") {
@@ -22,7 +26,33 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 			},
 			error: function(data) {
 				sendResponse({data: "ko"});
-				console.log("RenrenOauthCode Ajax Error");
+				console.info("RenrenOauthCode Ajax Error");
+			}
+		});
+	} else if (request.key === "doubanCode") {
+		var message = {
+			"client_id": doubanApiKey,
+			"client_secret": doubanSecretKey,
+			"redirect_uri": doubanRedirectUri,
+			"grant_type": "authorization_code",
+			"code": request.value
+		};
+
+		$.ajax({
+			url: "https://www.douban.com/service/auth2/token",
+			type: "POST",
+			data: message,
+			dataType: "json",
+			success: function(data) {
+				sendResponse({data: "ok"});
+				localStorage.setItem("doubanAccessToken", data.access_token);
+				localStorage.setItem("doubanRefreshToken", data.refresh_token);
+				localStorage.setItem("doubanUserId", data.douban_user_id);
+				window.location.reload();
+			},
+			error: function(data) {
+				sendResponse({data: "ko"});
+				console.info("DoubanOauthCode Ajax Error");
 			}
 		});
 	}

@@ -1,12 +1,11 @@
 html {
 	width: 500px;
 	height: 600px;
-	overflow-y: auto;
 }
 
 body {
 	font-size: 12px;
-	padding-top: 38px;
+	padding-top: 41px;
 }
 
 .tabbable {
@@ -37,6 +36,8 @@ body {
 
 .tab-content {
 	padding: 10px 10px 0 10px;
+	height: 559px;
+	overflow-y: scroll;
 }
 
 .item-avatar {
@@ -73,7 +74,7 @@ body {
 
 .item-retweeted {
 	margin-bottom: 3px;
-	background-color: #fafafa;
+	background-color: #f8f8f8;
 } 
 
 .close {
@@ -95,7 +96,7 @@ body {
 }
 
 .retweeted-title, .item-title {
-	font-weight: bold;
+	/*font-weight: bold;*/
 }
 
 .item-title {
@@ -112,4 +113,8 @@ body {
 	margin-right: 13px;
 	opacity: 0.7;
 	cursor: pointer;
+}
+
+.stars {
+	color: #f0ad4e;
 }

@@ -1,6 +1,7 @@
 var siteURL = {
 	"weibo": "http://weibo.com/",
-	"renren": "http://www.renren.com/"
+	"renren": "http://www.renren.com/",
+	"douban": "http://www.douban.com/"
 };
 
 itemHTML = '<div class="item-wrapper">'
@@ -183,7 +184,7 @@ $(document).ready(function() {
 					}
 
 				} else if (targetStatuses[sid].type === "renrenSimple") {
-					var ownerURL = siteURL["renren"] + status.ownerId;
+					var ownerURL = siteURL["renren"] + "people/" + status.ownerId;
 
 					$itemWrapper.find(".item-avatar img").attr("src", target["renren"]["avatar"][0]["url"]);
 					$itemWrapper.find(".item-avatar a").attr("href", ownerURL);
@@ -193,8 +194,85 @@ $(document).ready(function() {
 					$itemWrapper.find(".item-type").text(" 人人");
 					$itemWrapper.find(".item-text").text(status.content);
 					$itemWrapper.find(".item-more").attr("href", ownerURL);
-				}
-				
+
+				} else if (targetStatuses[sid].type === "douban") {
+
+					var ownerURL = siteURL["douban"] + "people/" + status.user.id
+
+					$itemWrapper.find(".item-avatar img").attr("src", status.user.small_avatar);
+					$itemWrapper.find(".item-avatar a").attr("href", ownerURL);
+					$itemWrapper.find(".item-owner").attr("href", ownerURL);
+					$itemWrapper.find(".item-owner").text(status.user.screen_name);
+					$itemWrapper.find(".item-time").text(weibo_timestamps(new Date(status.created_at)));
+					$itemWrapper.find(".item-type").text(" 豆瓣");
+					$itemWrapper.find(".item-text").text(status.text);
+					$itemWrapper.find(".item-more").attr("href", ownerURL+"/statuses");
+
+					var attachments = status.attachments;
+
+					if (attachments.length > 0) {
+						var media = attachments[0].media;
+
+						if (media.length > 0) {
+							if (media[0].type === "image") {
+								$itemWrapper.find(".item-text").before(
+									'<div class="item-pic"><img src="'+ media[0].src +'" /></div>'
+								);
+							} else if (media[0].type === "flash") {
+								$itemWrapper.find(".item-text").before(
+									'<div class="item-pic"><img src="'+ media[0].imgsrc +'" /></div>'
+								);
+							}
+						}
+
+						if (attachments[0].type !== "null" && status.title != "说：") {
+							var action,
+								obj = attachments[0].title,
+								stars = "";
+
+							var tag = "[score]";
+							var index = status.title.indexOf(tag);
+
+							if (index !== -1) {
+								action = status.title.substr(0, index);
+								var score = parseInt(status.title.substr(index + tag.length));
+								for (var num = 0; num < score; num++) {
+									stars += "\u2605";
+								}
+							} else {
+								action = status.title;
+							}
+							
+							$itemWrapper.find(".item-content").prepend(
+								'<div class="item-title">' 
+								+ action + '&nbsp;'
+								+ '<a>' + obj + '</a>' + "&nbsp;"
+								+ '<span class="stars">' + stars + '</span>'
+								+ '</div>'
+							);
+						}
+					}
+
+					if (typeof status.reshared_status !== "undefined") {
+						$itemWrapper.find(".item-text").text("转播");
+
+						$itemWrapper.find(".item-content").after(retweetedHTML);
+						$itemRetweeted = $itemWrapper.find(".item-retweeted");
+						var restatus = status.reshared_status;
+
+						$itemRetweeted.find(".retweeted-header").html(
+							'<span class="retweeted-title">' 
+							+ '<a target="_blank" href="'+ siteURL["douban"] + "people/" + restatus.user.id +'"">' + restatus.user.screen_name + '</a>' 
+							+ '&nbsp;' + restatus.title + '&nbsp;'
+							+ '<a target="_blank" href="' + restatus.attachments[0].expaned_href + '">' + restatus.attachments[0].title + '</a>'
+							+ '</span>'
+						);
+
+						$itemRetweeted.find(".retweeted-text").text(restatus.text);
+						$itemWrapper.find(".item-more").attr("href", restatus.attachments[0].expaned_href);
+					}
+
+				}		
 			}
 
 			isFirstKey = false;

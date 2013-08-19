@@ -99,6 +99,7 @@ if(localStorage.length === 0) {
 
 function checkAllStatusesUpdate() {
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
+	var timeout = -1000;
 
 	for (var key in checkPoint) {
 		for (var social in checkPoint[key]) {
@@ -107,16 +108,19 @@ function checkAllStatusesUpdate() {
 			switch (social) {
 				case "weibo":
 					apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&trim_user=0";
-					timeout = 0;
+					timeout += 1000;
 					break;
 				case "renren":
 					apiURL = "https://api.renren.com/v2/feed/list?access_token="+renrenAccessToken+"&userId="+targets[key][social]["id"];
-					timeout = 1000;
+					timeout += 1000;
 					break;
 				case "renrenSimple":
 					apiURL = "https://api.renren.com/v2/status/list?access_token="+renrenAccessToken+"&ownerId="+targets[key]["renren"]["id"];
-					timeout = 2000;
+					timeout += 1000;
 					break;
+				case "douban":
+					apiURL = "https://api.douban.com/shuo/v2/statuses/user_timeline/"+targets[key]["douban"]["id"]+"?apikey="+doubanApiKey;
+					timeout += 1000;
 				default:
 					break;
 			}
@@ -154,6 +158,10 @@ function checkStatusesUpdate(key, apiURL, social) {
 					case "renrenSimple":
 						statuses = data.response;
 						timestamp = "createTime";
+						break;
+					case "douban":
+						statuses = data;
+						timestamp = "created_at";
 						break;
 					default:
 						break;

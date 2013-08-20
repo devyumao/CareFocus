@@ -12,6 +12,8 @@ var doubanApiKey = "013a12dea106488403ae389be312d98c",
 	doubanRefreshToken,
 	doubanAccessToken;
 
+var audio = new Audio("audio/prompt-tone.wav");
+
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 	if (request.key === "renrenCode") {
 		$.ajax({
@@ -99,28 +101,28 @@ if(localStorage.length === 0) {
 
 function checkAllStatusesUpdate() {
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
-	var timeout = -1000;
+	var timeout = -1000,
+		interval = 1000;
 
 	for (var key in checkPoint) {
 		for (var social in checkPoint[key]) {
-			var apiURL,
-				timeout;
+			var apiURL;
 			switch (social) {
 				case "weibo":
 					apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&count=10&trim_user=0";
-					timeout += 1000;
+					timeout += interval;
 					break;
 				case "renren":
 					apiURL = "https://api.renren.com/v2/feed/list?access_token="+renrenAccessToken+"&userId="+targets[key][social]["id"]+"&pageSize=10";
-					timeout += 1000;
+					timeout += interval;
 					break;
 				case "renrenSimple":
 					apiURL = "https://api.renren.com/v2/status/list?access_token="+renrenAccessToken+"&ownerId="+targets[key]["renren"]["id"]+"&pageSize=10";
-					timeout += 1000;
+					timeout += interval;
 					break;
 				case "douban":
 					apiURL = "https://api.douban.com/shuo/v2/statuses/user_timeline/"+targets[key]["douban"]["id"]+"?apikey="+doubanApiKey+"&count=10";
-					timeout += 1000;
+					timeout += interval;
 				default:
 					break;
 			}
@@ -167,6 +169,8 @@ function checkStatusesUpdate(key, apiURL, social) {
 						break;
 				}
 
+				var audioPlayNeeded = false;
+
 				var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 
 				if (checkPoint[key][social] !== "") {
@@ -194,6 +198,7 @@ function checkStatusesUpdate(key, apiURL, social) {
 								notifAmount = parseInt((localStorage.getItem("notifAmount")));
 								localStorage.setItem("notifAmount", ++notifAmount);
 
+								audioPlayNeeded = true;
 							} else {
 								break;
 							}
@@ -205,6 +210,10 @@ function checkStatusesUpdate(key, apiURL, social) {
 				} else {
 					checkPoint[key][social] = new Date("2008-3-2 20:00:00");
 					localStorage.setItem("checkPoint", $.toJSON(checkPoint));
+				}
+
+				if (audioPlayNeeded) {
+					audio.play();
 				}
 
 				notifAmount = parseInt((localStorage.getItem("notifAmount")));

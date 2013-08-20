@@ -460,6 +460,12 @@ $(document).on("click", "#modal-weibo .btn-delete", function() {
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 	delete checkPoint[id]["weibo"];
 
+	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
+	var notifAmount = parseInt(localStorage.getItem("notifAmount") - deleteStatusByTypes(unreadStatuses, id, ["weibo"]));
+	chrome.browserAction.setBadgeText({text: (notifAmount > 0) ? "" + notifAmount : ""});
+
+	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+	localStorage.setItem("notifAmount", notifAmount);
 	localStorage.setItem("targets", $.toJSON(targets));
 	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 	backgroundPage.location.reload();
@@ -491,6 +497,12 @@ $(document).on("click", "#modal-renren .btn-delete", function() {
 	delete checkPoint[id]["renren"];
 	delete checkPoint[id]["renrenSimple"];
 
+	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
+	var notifAmount = parseInt(localStorage.getItem("notifAmount") - deleteStatusByTypes(unreadStatuses, id, ["renren", "renrenSimple"]));
+	chrome.browserAction.setBadgeText({text: (notifAmount > 0) ? "" + notifAmount : ""});
+
+	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+	localStorage.setItem("notifAmount", notifAmount);
 	localStorage.setItem("targets", $.toJSON(targets));
 	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 	backgroundPage.location.reload();
@@ -521,6 +533,12 @@ $(document).on("click", "#modal-douban .btn-delete", function() {
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 	delete checkPoint[id]["douban"];
 
+	var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
+	var notifAmount = parseInt(localStorage.getItem("notifAmount") - deleteStatusByTypes(unreadStatuses, id, ["douban"]));
+	chrome.browserAction.setBadgeText({text: (notifAmount > 0) ? "" + notifAmount : ""});
+
+	localStorage.setItem("unreadStatuses", $.toJSON(unreadStatuses));
+	localStorage.setItem("notifAmount", notifAmount);
 	localStorage.setItem("targets", $.toJSON(targets));
 	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 	backgroundPage.location.reload();
@@ -722,4 +740,15 @@ function getMarksFromTargets(targets) {
 		marks.push(targets[key]["mark"]);
 	}
 	return marks;
+}
+
+function deleteStatusByTypes(obj, key, types) {
+	var count = 0;
+	for (var sid in obj[key]) {
+		if ($.inArray(obj[key][sid]["type"], types) !== -1 ) {
+			count++;
+			delete obj[key][sid];
+		}
+	}
+	return count;
 }

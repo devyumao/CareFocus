@@ -19,7 +19,7 @@ itemHTML = '<div class="item-wrapper">'
 	+			'<div class="clear"></div>'
 	+		'</div>'
 	+		'<div class="item-footer">'
-	+			'<span class="item-from">来自<span class="item-type"></span></span>'			
+	+			'<div class="item-from"></div>'			
 	+			'<a class="item-more" target="_blank">查看详细</a>'
 	+		'</div>'
 	+	'</div>'
@@ -87,7 +87,7 @@ $(document).ready(function() {
 					$itemWrapper.find(".item-owner").attr("href", ownerURL);
 					$itemWrapper.find(".item-owner").text(status.user.screen_name);
 					$itemWrapper.find(".item-time").text(weibo_timestamps(new Date(status.created_at)));
-					$itemWrapper.find(".item-type").text(" 新浪微博");
+					$itemWrapper.find(".item-from").css("background-position-x", "-21px");
 					$itemWrapper.find(".item-text").text(status.text);
 					$itemWrapper.find(".item-more").attr("href", ownerURL);
 
@@ -122,7 +122,7 @@ $(document).ready(function() {
 					$itemWrapper.find(".item-owner").attr("href", ownerURL);
 					$itemWrapper.find(".item-owner").text(status.sourceUser.name);
 					$itemWrapper.find(".item-time").text(weibo_timestamps(new Date(status.time)));
-					$itemWrapper.find(".item-type").text(" 人人");
+					$itemWrapper.find(".item-from").css("background-position-x", "-86px");
 					$itemWrapper.find(".item-text").text(status.message);
 
 					switch (status.type) {
@@ -191,7 +191,7 @@ $(document).ready(function() {
 					$itemWrapper.find(".item-owner").attr("href", ownerURL);
 					$itemWrapper.find(".item-owner").text(target["renren"]["name"]);
 					$itemWrapper.find(".item-time").text(weibo_timestamps(new Date(status.createTime)));
-					$itemWrapper.find(".item-type").text(" 人人");
+					$itemWrapper.find(".item-from").css("background-position-x", "-86px");
 					$itemWrapper.find(".item-text").text(status.content);
 					$itemWrapper.find(".item-more").attr("href", ownerURL);
 
@@ -204,7 +204,7 @@ $(document).ready(function() {
 					$itemWrapper.find(".item-owner").attr("href", ownerURL);
 					$itemWrapper.find(".item-owner").text(status.user.screen_name);
 					$itemWrapper.find(".item-time").text(weibo_timestamps(new Date(status.created_at)));
-					$itemWrapper.find(".item-type").text(" 豆瓣");
+					$itemWrapper.find(".item-from").css("background-position-x", "0");
 					$itemWrapper.find(".item-text").text(status.text);
 					$itemWrapper.find(".item-more").attr("href", ownerURL+"/statuses");
 
@@ -337,7 +337,15 @@ $(document).ready(function() {
 			+ '<span title="清空当前对象的消息" class="glyphicon glyphicon-trash"></span>'
 		);
 	} else {
-
+		$("body").html(
+			'<ul class="nav navbar-fixed-top navbar-inverse"></ul>'
+			+ '<div class="welcome-wrap">'
+				+ '<div class="welcome-logo">'
+					+ '<img src="img/logo.png" />'
+				+ '</div>'
+				+ '<button type="button" class="welcome-btn btn btn-primary">添加关注对象</button>'
+			+'</div>'
+		);
 	}
 });
 
@@ -385,7 +393,7 @@ $(document).on("click", ".nav .glyphicon-trash", function() {
 });
 
 
-$(document).on("click", ".nav .glyphicon-cog", function() {
+$(document).on("click", ".nav .glyphicon-cog, .welcome-btn", function() {
 	chrome.tabs.create({url: "options.html"});
 });
 

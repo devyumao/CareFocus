@@ -1,11 +1,14 @@
 {
   "manifest_version": 2,
 
-  "name": "Social",
+  "name": "关关聚交 (Care Focus)",
   "description": "Only for test",
   "version": "1.0",
   "browser_action": {
-    "default_icon": "img/icon.png",
+    "default_icon": {
+      "19": "img/icon-19.png",
+      "38": "img/icon-38.png" 
+    },
     "default_popup": "popup.html"
   },
   "background": {

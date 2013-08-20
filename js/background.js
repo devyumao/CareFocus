@@ -127,7 +127,7 @@ function checkAllStatusesUpdate() {
 					break;
 			}
 			console.log(apiURL);
-			setTimeout(checkStatusesUpdate(key, apiURL, social), timeout);
+			// setTimeout(checkStatusesUpdate(key, apiURL, social), timeout);
 		}
 	}
 }

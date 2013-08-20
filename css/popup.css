@@ -8,8 +8,8 @@ body {
 	padding-top: 41px;
 }
 
-.tabbable {
-	
+.nav {
+	height: 41px;	
 }
 
 .nav .tab-name {
@@ -45,10 +45,6 @@ body {
 	float: left;
 }
 
-.item-status {
-	margin-left: 60px;
-}
-
 .item-more {
 	float: right;
 } 
@@ -68,14 +64,20 @@ body {
 .well {
 	background-color: white;
 	margin-top: 5px;
-	margin-bottom: 10px;
 	padding: 10px 12px 8px 12px;
+}
+
+.item-status {
+	margin-left: 60px;
+	margin-bottom: 14px;
+	padding-bottom: 2px;
 }
 
 .item-retweeted {
 	margin-bottom: 3px;
 	background-color: #f8f8f8;
 } 
+
 
 .close {
 	position: relative;
@@ -93,7 +95,6 @@ body {
 .item-owner {
 	font-weight: bold;
 }
-	
 
 .item-footer {
 	margin-top: 5px;
@@ -105,6 +106,19 @@ body {
 
 .item-title {
 	margin-bottom: 5px;
+}
+
+.item-time, .retweeted-time {
+	color: #aaa;
+}
+
+.item-from {
+	height: 18px;
+	width: 18px;
+	display: inline-block;
+	background-image:url(/img/social-icons.png);
+	background-size: 125px;
+	background-repeat: no-repeat;
 }
 
 .nav .glyphicon {
@@ -121,4 +135,18 @@ body {
 
 .stars {
 	color: #f0ad4e;
+}
+
+.welcome-wrap {
+	text-align: center;
+	margin-top: 100px;
+}
+
+.welcome-logo {
+	margin-bottom: 40px;
+}
+
+.welcome-logo img {
+	width: 200px;
+	height: 200px;
 }

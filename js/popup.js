@@ -171,7 +171,7 @@ $(document).ready(function() {
 							$itemWrapper.find(".item-more").attr("href", status.resource.url);
 							$itemWrapper.find(".item-content").after(retweetedHTML);
 							$itemRetweeted = $itemWrapper.find(".item-retweeted");
-							$itemRetweeted.find(".retweeted-header").html("<span class='retweeted-title'>" + status.resource.title + "</span>");
+							$itemRetweeted.find(".retweeted-header").html("<a class='retweeted-title' target='_blank' href='" + status.resource.url + "'>" + status.resource.title + "</a>");
 							$itemRetweeted.find(".retweeted-text").text(status.resource.content);
 							if (status.thumbnailUrl !== null) {
 								$itemRetweeted.find(".retweeted-text").before(
@@ -246,7 +246,7 @@ $(document).ready(function() {
 							$itemWrapper.find(".item-content").prepend(
 								'<div class="item-title">' 
 								+ action + '&nbsp;'
-								+ '<a>' + obj + '</a>' + "&nbsp;"
+								+ '<a target="_blank" href="'+ attachments[0].expaned_href +'">' + obj + '</a>' + "&nbsp;"
 								+ '<span class="stars">' + stars + '</span>'
 								+ '</div>'
 							);
@@ -260,13 +260,66 @@ $(document).ready(function() {
 						$itemRetweeted = $itemWrapper.find(".item-retweeted");
 						var restatus = status.reshared_status;
 
-						$itemRetweeted.find(".retweeted-header").html(
+						var origUserURL = "";
+						if (restatus.user.type === "user") {
+							origUserURL = siteURL["douban"] + "people/" + restatus.user.id;
+						} else if (restatus.user.type === "virtual") {
+							origUserURL = restatus.user.original_site_url;
+						}
+
+						var origAttachments = restatus.attachments;
+
+						if (origAttachments.length > 0) {
+							var origMedia = origAttachments[0].media;
+							if (origMedia.length > 0) {
+								if (origMedia[0].type === "image") {
+									console.log(": "+origMedia[0].src);
+									$itemRetweeted.find(".retweeted-text").before(
+										'<div class="retweeted-pic"><img src="'+ origMedia[0].src +'" /></div>'
+									);
+								} else if (origMedia[0].type === "flash") {
+									$itemRetweeted.find(".retweeted-text").before(
+										'<div class="retweeted-pic"><img src="'+ origMedia[0].imgsrc +'" /></div>'
+									);
+								}
+							}
+
+							if (origAttachments[0].type !== "null") {
+								var action,
+									obj = origAttachments[0].title,
+									stars = "";
+
+								var tag = "[score]";
+								var index = restatus.title.indexOf(tag);
+
+								if (index !== -1) {
+									action = restatus.title.substr(0, index);
+									var score = parseInt(restatus.title.substr(index + tag.length));
+									for (var num = 0; num < score; num++) {
+										stars += "\u2605";
+									}
+								} else {
+									action = restatus.title;
+								}
+								
+								$itemRetweeted.find(".retweeted-header").html(
+									'<span class="retweeted-title">'
+									+ '<a target="_blank" href="'+ origUserURL +'"">' + restatus.user.screen_name + '</a>' + '&nbsp;' 
+									+ action + '&nbsp;'
+									+ '<a target="_blank" href="'+ origAttachments[0].expaned_href +'">' + obj + '</a>' + '&nbsp;'
+									+ '<span class="stars">' + stars + '</span>'
+									+ '</span>'
+								);
+							}
+						}
+
+						/*$itemRetweeted.find(".retweeted-header").html(
 							'<span class="retweeted-title">' 
-							+ '<a target="_blank" href="'+ siteURL["douban"] + "people/" + restatus.user.id +'"">' + restatus.user.screen_name + '</a>' 
+							+ '<a target="_blank" href="'+ origUserURL +'"">' + restatus.user.screen_name + '</a>' 
 							+ '&nbsp;' + restatus.title + '&nbsp;'
 							+ '<a target="_blank" href="' + restatus.attachments[0].expaned_href + '">' + restatus.attachments[0].title + '</a>'
 							+ '</span>'
-						);
+						);*/
 
 						$itemRetweeted.find(".retweeted-text").text(restatus.text);
 						$itemWrapper.find(".item-more").attr("href", restatus.attachments[0].expaned_href);

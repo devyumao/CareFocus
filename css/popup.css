@@ -88,8 +88,12 @@ body {
 
 .item-owner, .retweeted-owner{
 	margin-right: 10px;
+}
+
+.item-owner {
 	font-weight: bold;
 }
+	
 
 .item-footer {
 	margin-top: 5px;

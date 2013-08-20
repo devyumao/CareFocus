@@ -107,25 +107,25 @@ function checkAllStatusesUpdate() {
 				timeout;
 			switch (social) {
 				case "weibo":
-					apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&trim_user=0";
+					apiURL = "https://api.weibo.com/2/statuses/user_timeline.json?source="+weiboAppKey+"&uid="+targets[key][social]["id"]+"&count=10&trim_user=0";
 					timeout += 1000;
 					break;
 				case "renren":
-					apiURL = "https://api.renren.com/v2/feed/list?access_token="+renrenAccessToken+"&userId="+targets[key][social]["id"];
+					apiURL = "https://api.renren.com/v2/feed/list?access_token="+renrenAccessToken+"&userId="+targets[key][social]["id"]+"&pageSize=10";
 					timeout += 1000;
 					break;
 				case "renrenSimple":
-					apiURL = "https://api.renren.com/v2/status/list?access_token="+renrenAccessToken+"&ownerId="+targets[key]["renren"]["id"];
+					apiURL = "https://api.renren.com/v2/status/list?access_token="+renrenAccessToken+"&ownerId="+targets[key]["renren"]["id"]+"&pageSize=10";
 					timeout += 1000;
 					break;
 				case "douban":
-					apiURL = "https://api.douban.com/shuo/v2/statuses/user_timeline/"+targets[key]["douban"]["id"]+"?apikey="+doubanApiKey;
+					apiURL = "https://api.douban.com/shuo/v2/statuses/user_timeline/"+targets[key]["douban"]["id"]+"?apikey="+doubanApiKey+"&count=10";
 					timeout += 1000;
 				default:
 					break;
 			}
 			console.log(apiURL);
-			// setTimeout(checkStatusesUpdate(key, apiURL, social), timeout);
+			setTimeout(checkStatusesUpdate(key, apiURL, social), timeout);
 		}
 	}
 }
@@ -171,7 +171,7 @@ function checkStatusesUpdate(key, apiURL, social) {
 
 				if (checkPoint[key][social] !== "") {
 					// var lastCheckPoint = new Date(checkPoint[key][social]);
-					lastCheckPoint = new Date("2013-2-23 23:25:58");
+					lastCheckPoint = new Date("2005-10-10 23:25:58");
 
 					for (var i = 0; i < statuses.length; i++) {
 						var status = statuses[i];

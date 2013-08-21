@@ -177,7 +177,7 @@ function checkStatusesUpdate(key, apiURL, social) {
 
 				if (checkPoint[key][social] !== "") {
 					var lastCheckPoint = new Date(checkPoint[key][social]);
-					// lastCheckPoint = new Date("2005-10-10 23:25:58");
+					// var lastCheckPoint = new Date("2005-10-10 23:25:58");
 
 					for (var i = 0; i < statuses.length; i++) {
 						var status = statuses[i];

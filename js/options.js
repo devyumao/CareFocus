@@ -238,6 +238,7 @@ function confirmAddTarget() {
 		var $wrapper = $(".target-wrapper").eq(currNum);
 		$wrapper.attr("id", "t"+id);
 		$wrapper.find(".target-mark").text(targets[id]["mark"]);
+		$wrapper.find(".target-avatar").css("background-image", "url(img/img-null.png)");
 
 
 		$('#modal-add-target').modal('hide');

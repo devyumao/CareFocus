@@ -44,6 +44,9 @@ $(document).ready(function() {
 	if (localStorage.getItem("unreadStatuses") !== null && localStorage.getItem("unreadStatuses") !== "{}") {		
 		var unreadStatuses = $.evalJSON(localStorage.getItem("unreadStatuses"));
 		var targets = $.evalJSON(localStorage.getItem("targets"));
+		var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
+		var activePane = localStorage.getItem("activePane");
+
 
 		var isFirstKey = true;
 		var $navTabs = $(".nav-tabs");
@@ -52,10 +55,17 @@ $(document).ready(function() {
 		for (var key in unreadStatuses) {
 			var target = targets[key];
 			var targetStatuses = unreadStatuses[key];
-
 			var count = getCountFromeObject(targetStatuses);
+
+			if (isFirstKey && activePane === "") {
+				activePane = key;
+				localStorage.setItem("activePane", activePane);
+			}
+
+			console.log(typeof activePane);
+			console.log(typeof key);
 			$navTabs.append(
-				"<li class='" + (isFirstKey ? "active" : "") + "'>" 
+				"<li class='" + ((activePane === key) ? "active" : "") + "'>" 
 				+ "<a href='#t" + key + "' data-toggle='tab'>"
 				+ "<span class='tab-name'>" + target["mark"] + "</span>"
 				+ "<span class='badge'>" + ((count > 0) ? count : "") + "</span>"
@@ -64,11 +74,23 @@ $(document).ready(function() {
 			);
 
 			$tabContent.append(
-				"<div class='tab-pane" + (isFirstKey ? " active" : "") + "' id='t" + key + "'></div>"
+				"<div class='tab-pane" + ((activePane === key) ? " active" : "") + "' id='t" + key + "'></div>"
 			);
 			
 			var sortedSids = getSortedKeysByTime(targetStatuses);
 			var $tabPane = $("#t"+key);
+
+			if (getCountFromeObject(checkPoint[key]) === 0) {
+				$tabPane.html(
+					'<div class="pane-info alert alert-info">' 
+					+ '您还没有给 <span class="mark">' + target["mark"] +'</span> 设置任何社交帐号, 前往<a class="alert-link" target="_blank" href="options.html">设置</a>。'
+					+'</div>'
+				);
+			} else if (sortedSids.length === 0) {
+				$tabPane.html(
+					'<div class="pane-no-unread">还没有新消息哦</div>'
+				);
+			}
 
 			for (var i = 0; i < sortedSids.length; i++) {
 				var sid = sortedSids[i];
@@ -349,6 +371,11 @@ $(document).ready(function() {
 	}
 });
 
+
+$(document).on("click", ".nav-tabs li a", function() {
+	var key = $(this).attr("href").substr(2);
+	localStorage.setItem("activePane", key); 
+});
 
 $(document).on("click", ".item-wrapper .close, .item-wrapper .item-more", function() {
 	$wrapper = $(this).parents(".item-wrapper");

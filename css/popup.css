@@ -150,3 +150,14 @@ body {
 	width: 200px;
 	height: 200px;
 }
+
+.pane-info {
+	margin-top: 5px;
+}
+
+.pane-no-unread {
+	margin-top: 10px;
+	text-align: center;
+	color: #aaa;
+	font-size: 13px;
+}

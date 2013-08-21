@@ -66,6 +66,7 @@ if(localStorage.length === 0) {
 	localStorage.setItem("targets", $.toJSON({}));
 	localStorage.setItem("checkPoint", $.toJSON({}));
 	localStorage.setItem("unreadStatuses", $.toJSON({}));
+	localStorage.setItem("activePane", "");
 } else {
 	var originNotif = parseInt((localStorage.getItem("notifAmount")));
 	if(originNotif > 0) {	

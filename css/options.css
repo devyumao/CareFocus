@@ -31,6 +31,15 @@ body {
 
 .row-footer {
 	margin-top: 5px;
+	color: #999;
+}
+
+.row-footer a {
+	color: #999;
+}
+
+.developer-info span {
+	float: right;
 }
 
 #btn-add {

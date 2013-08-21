@@ -67,6 +67,7 @@ if(localStorage.length === 0) {
 	localStorage.setItem("checkPoint", $.toJSON({}));
 	localStorage.setItem("unreadStatuses", $.toJSON({}));
 	localStorage.setItem("activePane", "");
+	localStorage.setItem("isPromptToneActive", $.toJSON(true));
 } else {
 	var originNotif = parseInt((localStorage.getItem("notifAmount")));
 	if(originNotif > 0) {	
@@ -91,7 +92,7 @@ if(localStorage.length === 0) {
 			error: function(data) {
 				renrenAccessToken = localStorage.getItem("renrenAccessToken");
 				checkAllStatusesUpdate();
-				alert("RenrenOauthRefresh Ajax Error");
+				console.log("RenrenOauthRefresh Ajax Error");
 			}
 		});
 	} else {
@@ -103,7 +104,7 @@ if(localStorage.length === 0) {
 function checkAllStatusesUpdate() {
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 	var timeout = -1000,
-		interval = 1000;
+		interval = 3000;
 
 	for (var key in checkPoint) {
 		for (var social in checkPoint[key]) {
@@ -128,7 +129,7 @@ function checkAllStatusesUpdate() {
 					break;
 			}
 			console.log(apiURL);
-			// setTimeout(checkStatusesUpdate(key, apiURL, social), timeout);
+			setTimeout(checkStatusesUpdate(key, apiURL, social), timeout);
 		}
 	}
 }
@@ -175,8 +176,8 @@ function checkStatusesUpdate(key, apiURL, social) {
 				var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 
 				if (checkPoint[key][social] !== "") {
-					// var lastCheckPoint = new Date(checkPoint[key][social]);
-					lastCheckPoint = new Date("2005-10-10 23:25:58");
+					var lastCheckPoint = new Date(checkPoint[key][social]);
+					// lastCheckPoint = new Date("2005-10-10 23:25:58");
 
 					for (var i = 0; i < statuses.length; i++) {
 						var status = statuses[i];
@@ -213,7 +214,7 @@ function checkStatusesUpdate(key, apiURL, social) {
 					localStorage.setItem("checkPoint", $.toJSON(checkPoint));
 				}
 
-				if (audioPlayNeeded) {
+				if (audioPlayNeeded && $.evalJSON(localStorage.getItem("isPromptToneActive"))) {
 					audio.play();
 				}
 
@@ -229,7 +230,7 @@ function checkStatusesUpdate(key, apiURL, social) {
 			}
 		});
 
-		// setTimeout(checkStatusesUpdate(key, apiURL, social), 90000);
+		setTimeout(checkStatusesUpdate(key, apiURL, social), 90000);
 	};
 	
 }

@@ -62,8 +62,6 @@ $(document).ready(function() {
 				localStorage.setItem("activePane", activePane);
 			}
 
-			console.log(typeof activePane);
-			console.log(typeof key);
 			$navTabs.append(
 				"<li class='" + ((activePane === key) ? "active" : "") + "'>" 
 				+ "<a href='#t" + key + "' data-toggle='tab'>"
@@ -206,7 +204,7 @@ $(document).ready(function() {
 					}
 
 				} else if (targetStatuses[sid].type === "renrenSimple") {
-					var ownerURL = siteURL["renren"] + "people/" + status.ownerId;
+					var ownerURL = siteURL["renren"] + status.ownerId;
 
 					$itemWrapper.find(".item-avatar img").attr("src", target["renren"]["avatar"][0]["url"]);
 					$itemWrapper.find(".item-avatar a").attr("href", ownerURL);

@@ -51,6 +51,8 @@ $(document).ready(function() {
 	var originKeys = getKeysFromObject(targets).sort();
 	var $rowTargets = $(".row-targets");
 
+	$(".sound-setting input").prop("checked", $.evalJSON(localStorage.getItem("isPromptToneActive")));
+
 	var i;
 	for (i = 0; i < originKeys.length; i++) {
 		$rowTargets.append(targetHTML);
@@ -65,6 +67,8 @@ $(document).ready(function() {
 			$wrapper.find(".target-avatar").css("background-image", "url("+targets[key]["renren"]["avatar"][2]["url"]+")");
 		} else if (targets[key]["avatarType"] === "douban") {
 			$wrapper.find(".target-avatar").css("background-image", "url("+targets[key]["douban"]["avatar"]+")");
+		} else {
+			$wrapper.find(".target-avatar").css("background-image", "url(img/img-null.png)");
 		}
 
 		for (var j = 0; j < socialNetworks.length; j++) {
@@ -78,6 +82,10 @@ $(document).ready(function() {
 	if (i >= 3) {
 		$("#btn-add").addClass("disabled");
 	}
+});
+
+$(document).on("click", ".sound-setting input", function() {
+	localStorage.setItem("isPromptToneActive", $.toJSON($(this).prop("checked")));
 });
 
 // glyphicons hover
@@ -124,6 +132,10 @@ $(document).on("click", "#modal-remove-target .confirm", function() {
 	var checkPoint = $.evalJSON(localStorage.getItem("checkPoint"));
 	delete checkPoint[currId];
 	localStorage.setItem("checkPoint", $.toJSON(checkPoint));
+
+	if (localStorage.getItem("activePane") === currId) {
+		localStorage.setItem("activePane", "");
+	}
 
 	backgroundPage.location.reload();
 
@@ -199,7 +211,7 @@ function confirmAddTarget() {
 		var keys = getKeysFromObject(targets);
 		var id;
 		if (keys.length !== 0) {
-			id = Math.max.apply(null,keys) + 1;
+			id = Math.max.apply(null, keys) + 1;
 		} else {
 			id = 1;
 		}	
@@ -285,7 +297,7 @@ $(document).on("click", ".btn-weibo", function() {
 							};
 						},
 						error: function(data) {
-							alert("Show Ajax Error");
+							console.log("Show Ajax Error");
 						}
 					});
 					return item;
@@ -583,7 +595,7 @@ function getAllScreenNames(uid, screenNames, cursor) {
 			}
 		},
 		error: function(data) {
-			alert("Friends Ajax Error");
+			console.log("Friends Ajax Error");
 		}
 	});
 }
@@ -647,7 +659,7 @@ function getRenrenFriends(uid, friends, pageNum) {
 			}
 		},
 		error: function(data) {
-			alert("FriendList Ajax Error");
+			console.log("FriendList Ajax Error");
 		}
 	});
 }
@@ -713,7 +725,7 @@ function getDoubanFriends(uid, friends, start) {
 			}
 		},
 		error: function(data) {
-			alert("Shuo Ajax Error");
+			console.log("Shuo Ajax Error");
 		}
 	});
 }

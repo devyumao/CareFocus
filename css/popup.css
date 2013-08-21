@@ -25,6 +25,10 @@ body {
 	right: 0px;
 }
 
+.nav-tabs li {
+	min-width: 70px;
+	text-align: center
+}
 
 .nav-tabs>li.active>a, .nav-tabs>li>a:hover, .nav-tabs>li>a:focus {
 	color: #555;

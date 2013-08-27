@@ -1,9 +1,14 @@
 {
   "manifest_version": 2,
 
-  "name": "关关聚交 (Care Focus)",
+  "name": "关关聚交",
   "description": "实时获得您所关心的人的多个社交平台更新。",
-  "version": "1.0.0",
+  "version": "1.0.2",
+  "icons": { 
+    "16": "img/icon-16.png",
+    "48": "img/icon-48.png",
+    "128": "img/icon-128.png" 
+  },
   "browser_action": {
     "default_icon": {
       "19": "img/icon-19.png",

@@ -155,6 +155,16 @@ body {
 	height: 200px;
 }
 
+.welcome-btn {
+	background-color: #5bb3f0;
+	border-color: #239bef;
+}
+
+.welcome-btn:hover, .welcome-btn:focus {
+	background-color: #34a2ee;
+	border-color: #239bef;
+}
+
 .pane-info {
 	margin-top: 5px;
 }
